@@ -1,47 +1,84 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Shield, ChevronRight, Eye, Activity, Globe, FileText, UserCheck, Flame, AlertTriangle, Zap, Lock, ScanLine } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
+import Scene from '../components/Scene';
+
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const LandingPage = () => {
-  // --- Custom CSS for Animations (Grid, Glitch, Float) ---
+  const container = useRef();
+  const heroTextRef = useRef();
+  const heroSubRef = useRef();
+  const heroBtnsRef = useRef();
+  const featuresRef = useRef();
+  const adminFeaturesRef = useRef();
+
+  useGSAP(() => {
+    // Hero Entrance Animation
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+    tl.fromTo('.hero-badge',
+      { y: 20, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.8 }
+    )
+      .fromTo(heroTextRef.current,
+        { y: 50, opacity: 0, scale: 0.95 },
+        { y: 0, opacity: 1, scale: 1, duration: 1 },
+        '-=0.4'
+      )
+      .fromTo(heroSubRef.current,
+        { y: 20, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.8 },
+        '-=0.6'
+      )
+      .fromTo(heroBtnsRef.current.children,
+        { y: 20, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.6, stagger: 0.1 },
+        '-=0.4'
+      );
+
+    // Feature Cards Scroll Animation
+    gsap.fromTo('.feature-card',
+      { y: 100, opacity: 0, rotationY: -15 },
+      {
+        y: 0,
+        opacity: 1,
+        rotationY: 0,
+        duration: 0.8,
+        stagger: 0.1,
+        ease: 'back.out(1.2)',
+        scrollTrigger: {
+          trigger: featuresRef.current,
+          start: 'top 75%',
+        }
+      }
+    );
+
+    // Admin Cards Scroll Animation
+    gsap.fromTo('.admin-card',
+      { y: 80, opacity: 0, scale: 0.9 },
+      {
+        y: 0,
+        opacity: 1,
+        scale: 1,
+        duration: 0.8,
+        stagger: 0.1,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: adminFeaturesRef.current,
+          start: 'top 80%',
+        }
+      }
+    );
+  }, { scope: container });
+
   const styles = `
-    @keyframes move-grid {
-      0% { transform: perspective(500px) rotateX(60deg) translateY(0); }
-      100% { transform: perspective(500px) rotateX(60deg) translateY(50px); }
-    }
-    @keyframes float {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-20px); }
-    }
-    @keyframes pulse-glow {
-      0%, 100% { opacity: 0.5; transform: scale(1); }
-      50% { opacity: 0.8; transform: scale(1.1); }
-    }
-    .cyber-grid {
-      position: absolute;
-      width: 200%;
-      height: 200%;
-      top: -50%;
-      left: -50%;
-      background-image: 
-        linear-gradient(rgba(16, 185, 129, 0.1) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(16, 185, 129, 0.1) 1px, transparent 1px);
-      background-size: 40px 40px;
-      animation: move-grid 4s linear infinite;
-      z-index: 0;
-      opacity: 0.3;
-      mask-image: linear-gradient(to bottom, transparent 5%, black 40%, transparent 90%);
-    }
-    .card-3d {
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      transform-style: preserve-3d;
-    }
-    .card-3d:hover {
-      transform: translateY(-10px) scale(1.02);
-      box-shadow: 0 20px 40px -15px rgba(16, 185, 129, 0.3);
-    }
     .glitch-text {
       position: relative;
     }
@@ -83,11 +120,14 @@ const LandingPage = () => {
   `;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 font-sans selection:bg-emerald-500/30 overflow-x-hidden">
+    <div ref={container} className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 font-sans selection:bg-emerald-500/30 overflow-x-hidden relative">
       <style>{styles}</style>
-      
+
+      {/* 3D Scene Background */}
+      <Scene />
+
       {/* --- Navigation --- */}
-      <nav className="fixed top-0 w-full z-50 border-b border-slate-200 dark:border-slate-800/50 bg-slate-50 dark:bg-slate-950/80 backdrop-blur-md">
+      <nav className="fixed top-0 w-full z-50 border-b border-slate-200/50 dark:border-slate-800/50 bg-slate-50/70 dark:bg-slate-950/70 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 text-emerald-500 font-bold text-xl tracking-tighter group cursor-pointer">
             <Shield className="w-6 h-6 fill-emerald-500/20 group-hover:rotate-12 transition-transform duration-500" />
@@ -114,41 +154,32 @@ const LandingPage = () => {
       </nav>
 
       {/* --- Hero Section --- */}
-      <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 px-6 overflow-hidden">
-        {/* Animated Cyber Grid Background */}
-        <div className="absolute inset-0 pointer-events-none perspective-[1000px]">
-            <div className="cyber-grid"></div>
-        </div>
-
-        {/* Floating Orbs */}
-        <div className="absolute top-20 left-10 w-72 h-72 bg-emerald-500/10 rounded-full blur-[100px] animate-[pulse-glow_4s_infinite]"></div>
-        <div className="absolute top-40 right-10 w-96 h-96 bg-red-600/5 rounded-full blur-[120px] animate-[pulse-glow_5s_infinite_reverse]"></div>
-
+      <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 px-6">
         <div className="max-w-5xl mx-auto text-center relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-emerald-500 text-xs font-medium mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700 backdrop-blur-sm">
+          <div className="hero-badge inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/50 dark:bg-slate-900/50 border border-slate-200/50 dark:border-slate-800/50 text-emerald-500 text-xs font-medium mb-8 backdrop-blur-md opacity-0">
             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
             SYSTEM OPERATIONAL V2.0
           </div>
-          
-          <h1 className="text-5xl md:text-7xl font-bold text-slate-900 dark:text-white tracking-tight mb-6 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100 leading-tight">
+
+          <h1 ref={heroTextRef} className="text-5xl md:text-7xl font-bold text-slate-900 dark:text-white tracking-tight mb-6 leading-tight opacity-0">
             Intelligent Links That <br />
-            <span className="glitch-text text-transparent bg-clip-text bg-linear-to-r from-emerald-400 to-cyan-500" data-text="Self-Destruct & Adapt">
+            <span className="glitch-text text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500" data-text="Self-Destruct & Adapt">
               Self-Destruct & Adapt.
             </span>
           </h1>
-          
-          <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-10 max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
+
+          <p ref={heroSubRef} className="text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-10 max-w-2xl mx-auto leading-relaxed opacity-0">
             The ultimate tool for secure communications. Create password-protected, time-sensitive links that vanish after use. Used by operatives, journalists, and privacy advocates worldwide.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
+          <div ref={heroBtnsRef} className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link to="/register" className="w-full sm:w-auto">
               <Button className="h-14 px-8 text-base bg-emerald-600 hover:bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:scale-105 transition-all duration-300">
                 Start Mission <ChevronRight className="w-4 h-4 ml-2" />
               </Button>
             </Link>
             <a href="#features" className="w-full sm:w-auto">
-              <button className="w-full sm:w-auto h-14 px-8 rounded-lg border border-slate-300 dark:border-slate-700 hover:border-emerald-500/50 hover:bg-white dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 font-medium transition-all duration-300 flex items-center justify-center gap-2 group backdrop-blur-sm">
+              <button className="w-full sm:w-auto h-14 px-8 rounded-lg border border-slate-300/50 dark:border-slate-700/50 hover:border-emerald-500/50 hover:bg-white/50 dark:hover:bg-slate-900/50 text-slate-700 dark:text-slate-300 font-medium transition-all duration-300 flex items-center justify-center gap-2 group backdrop-blur-md">
                 <ScanLine className="w-4 h-4 text-emerald-500 group-hover:animate-ping" /> View Capabilities
               </button>
             </a>
@@ -156,11 +187,9 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* --- User Features Grid (3D Cards) --- */}
-      <section id="features" className="py-24 px-6 bg-white dark:bg-slate-900/30 border-y border-slate-200 dark:border-slate-800/50 relative">
-        {/* Decorative Lines */}
-        <div className="absolute top-0 left-1/4 w-px h-full bg-linear-to-b from-transparent via-slate-800 to-transparent opacity-50"></div>
-        <div className="absolute top-0 right-1/4 w-px h-full bg-linear-to-b from-transparent via-slate-800 to-transparent opacity-50"></div>
+      {/* --- User Features Grid --- */}
+      <section id="features" ref={featuresRef} className="py-24 px-6 relative z-10">
+        <div className="absolute inset-0 bg-white/40 dark:bg-slate-900/40 backdrop-blur-[2px] border-y border-slate-200/50 dark:border-slate-800/50 pointer-events-none"></div>
 
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center mb-16">
@@ -172,58 +201,19 @@ const LandingPage = () => {
             <p className="text-slate-600 dark:text-slate-400">Tools designed for secure, ephemeral data sharing.</p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <FeatureCard 
-              icon={Zap} 
-              color="text-yellow-400"
-              bg="bg-yellow-400/10"
-              title="Instant Shortening" 
-              desc="Generate compact, shareable short links from any URL in a single click. Ready for immediate deployment." 
-            />
-            <FeatureCard 
-              icon={Flame} 
-              color="text-orange-500"
-              bg="bg-orange-500/10"
-              title="Self-Destruct Timer" 
-              desc="Set an exact timestamp. Once reached, the link incinerates itself and shows an expiry message." 
-            />
-            <FeatureCard 
-              icon={Eye} 
-              color="text-emerald-400"
-              bg="bg-emerald-400/10"
-              title="One-Time Access" 
-              desc="Burn after reading. The link invalidates immediately after the first successful access." 
-            />
-            <FeatureCard 
-              icon={Lock} 
-              color="text-blue-400"
-              bg="bg-blue-400/10"
-              title="Password Protection" 
-              desc="Links are hashed server-side. Visitors must enter the correct decryption key to proceed." 
-            />
-            <FeatureCard 
-              icon={Activity} 
-              color="text-purple-400"
-              bg="bg-purple-400/10"
-              title="Multi-Use Countdown" 
-              desc="Limit access to a specific count (e.g., 5 clicks). The link auto-destroys when the limit is reached." 
-            />
-            <FeatureCard 
-              icon={Globe} 
-              color="text-cyan-400"
-              bg="bg-cyan-400/10"
-              title="Custom Slugs" 
-              desc="Choose a human-readable alias for your links to make them memorable and brandable." 
-            />
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 perspective-[1000px]">
+            <FeatureCard className="feature-card" icon={Zap} color="text-yellow-400" bg="bg-yellow-400/10" title="Instant Shortening" desc="Generate compact, shareable short links from any URL in a single click. Ready for immediate deployment." />
+            <FeatureCard className="feature-card" icon={Flame} color="text-orange-500" bg="bg-orange-500/10" title="Self-Destruct Timer" desc="Set an exact timestamp. Once reached, the link incinerates itself and shows an expiry message." />
+            <FeatureCard className="feature-card" icon={Eye} color="text-emerald-400" bg="bg-emerald-400/10" title="One-Time Access" desc="Burn after reading. The link invalidates immediately after the first successful access." />
+            <FeatureCard className="feature-card" icon={Lock} color="text-blue-400" bg="bg-blue-400/10" title="Password Protection" desc="Links are hashed server-side. Visitors must enter the correct decryption key to proceed." />
+            <FeatureCard className="feature-card" icon={Activity} color="text-purple-400" bg="bg-purple-400/10" title="Multi-Use Countdown" desc="Limit access to a specific count (e.g., 5 clicks). The link auto-destroys when the limit is reached." />
+            <FeatureCard className="feature-card" icon={Globe} color="text-cyan-400" bg="bg-cyan-400/10" title="Custom Slugs" desc="Choose a human-readable alias for your links to make them memorable and brandable." />
           </div>
         </div>
       </section>
 
       {/* --- Admin Features Grid --- */}
-      <section className="py-24 px-6 relative overflow-hidden">
-        {/* Subtle Red Glow for Admin Section */}
-        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-red-900/10 rounded-full blur-[120px]"></div>
-
+      <section ref={adminFeaturesRef} className="py-24 px-6 relative z-10">
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4 flex items-center justify-center gap-3">
@@ -235,40 +225,16 @@ const LandingPage = () => {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <FeatureCard 
-              icon={Shield} 
-              color="text-red-500"
-              bg="bg-red-500/10"
-              title="Global Moderation" 
-              desc="Search and manage all links. Disable or delete problematic entries instantly." 
-            />
-            <FeatureCard 
-              icon={UserCheck} 
-              color="text-indigo-400"
-              bg="bg-indigo-400/10"
-              title="Access Controls" 
-              desc="Define roles (Regular, Premium, Admin) and assign specific feature sets." 
-            />
-            <FeatureCard 
-              icon={FileText} 
-              color="text-slate-700 dark:text-slate-300"
-              bg="bg-slate-300/10"
-              title="Audit Logs" 
-              desc="Immutable records of all admin actions and major system events for accountability." 
-            />
-            <FeatureCard 
-              icon={AlertTriangle} 
-              color="text-yellow-500"
-              bg="bg-yellow-500/10"
-              title="Abuse Prevention" 
-              desc="Rate-limiting and IP blacklisting to protect the infrastructure from attacks." 
-            />
+            <FeatureCard className="admin-card" icon={Shield} color="text-red-500" bg="bg-red-500/10" title="Global Moderation" desc="Search and manage all links. Disable or delete problematic entries instantly." />
+            <FeatureCard className="admin-card" icon={UserCheck} color="text-indigo-400" bg="bg-indigo-400/10" title="Access Controls" desc="Define roles (Regular, Premium, Admin) and assign specific feature sets." />
+            <FeatureCard className="admin-card" icon={FileText} color="text-slate-700 dark:text-slate-300" bg="bg-slate-300/10" title="Audit Logs" desc="Immutable records of all admin actions and major system events for accountability." />
+            <FeatureCard className="admin-card" icon={AlertTriangle} color="text-yellow-500" bg="bg-yellow-500/10" title="Abuse Prevention" desc="Rate-limiting and IP blacklisting to protect the infrastructure from attacks." />
           </div>
         </div>
       </section>
 
       {/* --- Footer --- */}
-      <footer className="border-t border-slate-200 dark:border-slate-800 py-12 bg-slate-50 dark:bg-slate-950 text-center relative z-10">
+      <footer className="border-t border-slate-200/50 dark:border-slate-800/50 py-12 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-md text-center relative z-10">
         <div className="max-w-7xl mx-auto px-6 flex flex-col items-center">
           <div className="flex items-center gap-2 text-emerald-500 font-bold text-lg mb-6 hover:scale-110 transition-transform duration-300">
             <Shield className="w-5 h-5" />
@@ -284,17 +250,17 @@ const LandingPage = () => {
 };
 
 // 3D Tilt Card Component
-const FeatureCard = ({ icon: Icon, title, desc, color, bg }) => (
-  <div className="card-3d p-6 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-emerald-500/30 relative overflow-hidden group">
+const FeatureCard = ({ icon: Icon, title, desc, color, bg, className = '' }) => (
+  <div className={`p-6 rounded-xl bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border border-slate-200/50 dark:border-slate-800/50 hover:border-emerald-500/50 relative overflow-hidden group transition-colors duration-300 shadow-xl ${className}`}>
     {/* Glow effect on hover */}
-    <div className="absolute inset-0 bg-linear-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-    
-    <div className={`w-14 h-14 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-center mb-4 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 ${bg}`}>
+    <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+
+    <div className={`w-14 h-14 rounded-xl border border-slate-200/50 dark:border-slate-800/50 flex items-center justify-center mb-4 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 ${bg}`}>
       <Icon className={`w-7 h-7 ${color}`} />
     </div>
-    
+
     <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3 group-hover:text-emerald-400 transition-colors">{title}</h3>
-    <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed relative z-10 group-hover:text-slate-700 dark:text-slate-300 transition-colors">
+    <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed relative z-10 group-hover:text-slate-800 dark:group-hover:text-slate-200 transition-colors">
       {desc}
     </p>
   </div>
