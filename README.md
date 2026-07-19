@@ -1,12 +1,12 @@
-# 🔗 Deadman-Link
+# 🔗 VanishLink
 
-Deadman-Link is a secure, self-destructing short link platform equipped with dynamic redirection routing, automated URL safety scanners, built-in content moderation, and real-time visitor analytics. The platform also features synchronized media **Watch Parties** and a full-featured **Admin Console** for absolute operational control.
+VanishLink is a secure, self-destructing short link platform equipped with dynamic redirection routing, automated URL safety scanners, built-in content moderation, and real-time visitor analytics. The platform also features synchronized media **Watch Parties** and a full-featured **Admin Console** for absolute operational control.
 
 ---
 
 ## 🚀 Key Feature Highlights
 
-### 1. Deadman Link Management
+### 1. VanishLink Management
 - **Self-Destruction**: Links can expire after a specific time (`expiresAt`) or when they reach a set click limit (`maxClicks`).
 - **One-Time Links**: Enforces a strict single-use redirect restriction.
 - **Scheduled Access**: Delay activation until a set future date/time.
@@ -69,7 +69,7 @@ Admins gain access to a dedicated dashboard suite:
 ## 📁 Project Directory Structure
 
 ```text
-Deadman-Link-main/
+VanishLink-main/
 ├── server/                 # Express backend server
 │   ├── config/             # Passport, database connection setups
 │   ├── middleware/         # Rate limiters, IP blocker, audit logger, auth
@@ -108,7 +108,7 @@ Run these commands in your terminal:
 
 ```bash
 # Clone the repository and enter the folder
-cd Deadman-Link-main
+cd VanishLink-main
 
 # Install frontend dependencies
 npm install
@@ -134,10 +134,10 @@ VITE_APP_URL=http://localhost:5173
 Create a `.env` file in the **`server`** folder:
 ```env
 # MongoDB Connection String
-MONGO_URI=mongodb://127.0.0.1:27017/deadman_link
+MONGO_URI=mongodb://127.0.0.1:27017/vanishlink_link
 
 # JWT Secret used to sign authentication tokens
-JWT_SECRET=DeadmanLink2025SecureKey!@$%^&*()_.+
+JWT_SECRET=VanishLinkLink2025SecureKey!@$%^&*()_.+
 
 # Server Listening Port
 PORT=5050
@@ -204,7 +204,7 @@ npm run dev
 - `DELETE /delete-account`: Deletes user account and all owned links.
 - `GET /google/login`, `/google/register`, `/google/admin`: Google OAuth provider pathways.
 
-### Deadman Link Controls (`/api/links`)
+### VanishLink Controls (`/api/links`)
 - `GET /public`: Retrieve community feed links.
 - `GET /`: Retrieve links created by the current user.
 - `POST /`: Create a new shortened link with dynamic routing properties.

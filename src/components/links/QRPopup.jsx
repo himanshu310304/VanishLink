@@ -32,7 +32,7 @@ export const QRPopup = ({ isOpen, onClose, url }) => {
       const pngUrl = canvas.toDataURL('image/png');
       const link = document.createElement('a');
       link.href = pngUrl;
-      link.download = 'deadman-link-qr.png';
+      link.download = 'vanishlink-link-qr.png';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -59,7 +59,7 @@ export const QRPopup = ({ isOpen, onClose, url }) => {
 
         <div className="text-center mb-4">
           <p className="text-xs uppercase tracking-[0.2em] text-emerald-400">
-            Deadman-Link
+            VanishLink
           </p>
           <h2 className="text-lg font-semibold text-slate-900 dark:text-white mt-1">
             Share via QR Code

@@ -674,7 +674,7 @@ const WatchRoom = () => {
       <header className="border-b border-slate-900 bg-slate-50 dark:bg-slate-950/80 backdrop-blur-sm px-4 py-3 flex items-center justify-between">
         <div>
           <p className="text-[11px] uppercase tracking-[0.2em] text-emerald-400">
-            Deadman-Link Watch
+            VanishLink Watch
           </p>
           <h1 className="text-sm sm:text-base font-semibold">
             {room.title || 'Watch Party'}

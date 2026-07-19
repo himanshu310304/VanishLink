@@ -97,7 +97,7 @@ const StatusBadges = ({ link }) => {
 
 const getLinkAvatar = (link) => {
   const seed = encodeURIComponent(
-    link.title || link.slug || link.targetUrl || 'Deadman Agent',
+    link.title || link.slug || link.targetUrl || 'VanishLink Agent',
   );
   return `https://api.dicebear.com/7.x/bottts/svg?seed=${seed}`;
 };

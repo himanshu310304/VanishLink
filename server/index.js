@@ -49,7 +49,7 @@ app.use('/api/auth', authLimiter, authRoutes);
 
 // ---- MongoDB connection ----
 const MONGO_URI =
-  process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/deadman_link';
+  process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/vanishlink_link';
 
 mongoose
   .connect(MONGO_URI)
@@ -511,7 +511,7 @@ function sendWebhook(link, eventType, extra = {}) {
 app.get('/r/:slug', redirectLimiter, async (req, res) => {
   try {
     const link = await Link.findOne({ slug: req.params.slug });
-    if (!link) return res.status(404).send('Deadman-Link: Not found');
+    if (!link) return res.status(404).send('VanishLink: Not found');
 
     const now = new Date();
 
@@ -521,16 +521,16 @@ app.get('/r/:slug', redirectLimiter, async (req, res) => {
         await link.save();
         sendWebhook(link, 'expired', { reason: 'time_expired' });
       }
-      return res.status(410).send('Deadman-Link: Expired');
+      return res.status(410).send('VanishLink: Expired');
     }
 
     if (link.scheduleStart && now < link.scheduleStart) {
-      return res.status(403).send('Deadman-Link: Not active yet');
+      return res.status(403).send('VanishLink: Not active yet');
     }
 
     const limit = link.isOneTime ? 1 : link.maxClicks || 0;
     if (limit > 0 && link.clicks >= limit) {
-      return res.status(410).send('Deadman-Link: Click limit reached');
+      return res.status(410).send('VanishLink: Click limit reached');
     }
 
     const userAgent = req.headers['user-agent'] || '';
@@ -570,7 +570,7 @@ app.get('/r/:slug', redirectLimiter, async (req, res) => {
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${link.title || 'Deadman-Link'}</title>
+        <title>${link.title || 'VanishLink'}</title>
         <style>
           body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background-color: #0f172a; font-family: system-ui, -apple-system, sans-serif; }
           iframe { border: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; }
@@ -611,7 +611,7 @@ app.get('/r/:slug', redirectLimiter, async (req, res) => {
     return res.send(html);
   } catch (err) {
     console.error(err);
-    res.status(500).send('Deadman-Link: Internal server error');
+    res.status(500).send('VanishLink: Internal server error');
   }
 });
 

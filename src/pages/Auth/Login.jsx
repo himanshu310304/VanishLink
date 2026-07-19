@@ -60,7 +60,7 @@ const Login = () => {
       <div className="absolute top-6 left-6 md:top-8 md:left-8 z-50 flex items-center gap-4">
         <Link to="/" className="flex items-center gap-2 text-emerald-500 font-bold text-xl tracking-tighter group cursor-pointer hover:scale-105 transition-transform">
           <Shield className="w-6 h-6 fill-emerald-500/20 group-hover:rotate-12 transition-transform duration-500" />
-          <span className="tracking-[0.2em]">DEADMAN</span>
+          <span className="tracking-[0.2em]">VANISHLINK</span>
         </Link>
         <ThemeToggle />
       </div>

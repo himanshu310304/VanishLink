@@ -11,7 +11,7 @@ const Expired = () => {
         </div>
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Link Expired</h1>
         <p className="text-slate-600 dark:text-slate-400">
-          This Deadman link has self-destructed due to time limits or view counts.
+          This VanishLink link has self-destructed due to time limits or view counts.
         </p>
       </Card>
     </div>

@@ -30,7 +30,7 @@ const AdminLayout = () => {
         <div className="h-16 flex items-center justify-between px-6 border-b border-slate-200 dark:border-slate-800">
           <div className="flex items-center gap-2 text-red-500 font-bold text-xl tracking-tight">
             <Shield className="w-6 h-6" />
-            <span>Deadman Admin</span>
+            <span>VanishLink Admin</span>
           </div>
           <ThemeToggle />
         </div>

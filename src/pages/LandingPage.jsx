@@ -91,7 +91,7 @@ const LandingPage = () => {
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 text-emerald-500 font-bold text-xl tracking-tighter group cursor-pointer">
             <Shield className="w-6 h-6 fill-emerald-500/20 group-hover:rotate-12 transition-transform duration-500" />
-            <span className="tracking-[0.2em]">DEADMAN</span>
+            <span className="tracking-[0.2em]">VANISHLINK</span>
           </Link>
           <div className="flex items-center gap-6">
             <ThemeToggle />
@@ -272,10 +272,10 @@ const LandingPage = () => {
         <div className="max-w-7xl mx-auto px-6 flex flex-col items-center">
           <div className="flex items-center gap-2 text-emerald-500 font-bold text-lg mb-6 hover:scale-110 transition-transform duration-300">
             <Shield className="w-5 h-5" />
-            <span>DEADMAN LINK</span>
+            <span>VANISHLINK LINK</span>
           </div>
           <p className="text-xs text-slate-600">
-            © 2025 Deadman Link Inc. Encrypted in transit and at rest.
+            © 2025 VanishLink Inc. Encrypted in transit and at rest.
           </p>
         </div>
       </footer>

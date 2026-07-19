@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const AdminUser = require('../models/AdminUser');
 
 const MONGO_URI =
-  process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/deadman_link';
+  process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/vanishlink_link';
 
 async function run() {
   try {

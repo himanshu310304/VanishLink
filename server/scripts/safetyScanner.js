@@ -1,5 +1,5 @@
 // server/scripts/safetyScanner.js
-// Simple heuristic "AI-ish" safety scanner for Deadman-Link.
+// Simple heuristic "AI-ish" safety scanner for VanishLink.
 // This does NOT call any external ML API – it's fast and local.
 //
 // Usage example:

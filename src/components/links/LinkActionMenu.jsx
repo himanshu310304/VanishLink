@@ -33,7 +33,7 @@ export const LinkActionMenu = ({
   };
 
   const handleShareEmail = () => {
-    const subject = encodeURIComponent(`Check out: ${link.title || 'Deadman Link'}`);
+    const subject = encodeURIComponent(`Check out: ${link.title || 'VanishLink'}`);
     const body = encodeURIComponent(`I wanted to share this with you:\n\n${url}`);
     window.open(`https://mail.google.com/mail/?view=cm&fs=1&su=${subject}&body=${body}`, '_blank');
   };

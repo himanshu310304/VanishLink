@@ -63,7 +63,7 @@ const DashboardLayout = () => {
         <div className="h-16 flex items-center px-6 border-b border-slate-300 dark:border-slate-700/50">
           <div className="flex items-center gap-2 text-emerald-400 font-bold text-xl tracking-tight">
             <Shield className="w-6 h-6" />
-            <span>Deadman</span>
+            <span>VanishLink</span>
           </div>
         </div>
 
@@ -162,7 +162,7 @@ const DashboardLayout = () => {
         <div className="md:hidden h-16 border-b border-slate-300 dark:border-slate-700/50 flex items-center px-4 justify-between bg-white dark:bg-slate-900/40 backdrop-blur-xl sticky top-0 z-20">
           <div className="flex items-center gap-2 text-emerald-400 font-bold">
             <Shield className="w-5 h-5" />
-            <span>Deadman</span>
+            <span>VanishLink</span>
           </div>
 
           <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:text-slate-200 transition-colors">

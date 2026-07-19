@@ -117,7 +117,7 @@ const RedirectHandler = () => {
         <div className="absolute top-6 left-6 md:top-8 md:left-8 z-50">
           <a href="/" className="flex items-center gap-2 text-emerald-500 font-bold text-xl tracking-tighter group cursor-pointer hover:scale-105 transition-transform">
             <ShieldAlert className="w-6 h-6 fill-emerald-500/20 group-hover:rotate-12 transition-transform duration-500" />
-            <span className="tracking-[0.2em]">DEADMAN</span>
+            <span className="tracking-[0.2em]">VANISHLINK</span>
           </a>
         </div>
         <Loader2 className="w-12 h-12 text-emerald-500 animate-spin mb-4" />
@@ -139,7 +139,7 @@ const RedirectHandler = () => {
           </div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Link Not Found</h1>
           <p className="text-slate-600 dark:text-slate-400">
-            This Deadman link does not exist or was removed.
+            This VanishLink link does not exist or was removed.
           </p>
         </Card>
       </div>
@@ -155,7 +155,7 @@ const RedirectHandler = () => {
           </div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Connection Terminated</h1>
           <p className="text-slate-600 dark:text-slate-400">
-            {reason || 'This Deadman link has expired or self-destructed.'}
+            {reason || 'This VanishLink link has expired or self-destructed.'}
           </p>
         </Card>
       </div>
@@ -171,7 +171,7 @@ const RedirectHandler = () => {
           </div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Link Not Active Yet</h1>
           <p className="text-slate-600 dark:text-slate-400 text-sm">
-            {reason || 'This Deadman link is scheduled to activate later.'}
+            {reason || 'This VanishLink link is scheduled to activate later.'}
           </p>
           {startsAt && (
             <p className="text-xs text-slate-500 mt-2">

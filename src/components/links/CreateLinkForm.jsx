@@ -415,7 +415,7 @@ export const CreateLinkForm = ({ onSuccess }) => {
       <div className="mt-3 border border-slate-200 dark:border-slate-800 rounded-lg bg-slate-50 dark:bg-slate-950/60 p-3 text-xs">
         <div className="flex items-center justify-between mb-1">
           <span className="font-medium text-slate-800 dark:text-slate-200">
-            Similar links already stored in Deadman
+            Similar links already stored in VanishLink
           </span>
           {similarLoading && (
             <span className="text-[10px] text-slate-600 dark:text-slate-400">
@@ -1081,7 +1081,7 @@ export const CreateLinkForm = ({ onSuccess }) => {
                     />
                     <p className="text-[11px] text-slate-500">
                       Sent as{' '}
-                      <code className="font-mono">x-deadman-secret</code>{' '}
+                      <code className="font-mono">x-vanishlink-secret</code>{' '}
                       header so your server can verify the request.
                     </p>
                   </div>
@@ -1160,7 +1160,7 @@ export const CreateLinkForm = ({ onSuccess }) => {
 
         <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
           <Button type="submit" isLoading={loading}>
-            {loading ? 'Encrypting...' : 'Generate Deadman Link'}
+            {loading ? 'Encrypting...' : 'Generate VanishLink'}
           </Button>
         </div>
       </form>

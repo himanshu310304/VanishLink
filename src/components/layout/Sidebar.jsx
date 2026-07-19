@@ -14,7 +14,7 @@ const Sidebar = () => {
       {/* Logo Area */}
       <div className="mb-8 flex items-center px-2">
         <div className="h-8 w-8 rounded-lg bg-slate-50 dark:bg-black"></div>
-        <span className="ml-3 text-lg font-bold">Deadman Link</span>
+        <span className="ml-3 text-lg font-bold">VanishLink</span>
       </div>
 
       {/* Navigation Links */}

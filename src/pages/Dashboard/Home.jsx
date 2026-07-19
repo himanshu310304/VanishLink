@@ -63,7 +63,7 @@ const DashboardHome = () => {
     <div className="h-full w-full space-y-8">
       <div className="relative">
         <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-2">Dashboard</h1>
-        <p className="text-lg text-slate-700 dark:text-slate-300">Create and manage your deadman links</p>
+        <p className="text-lg text-slate-700 dark:text-slate-300">Create and manage your vanishlink links</p>
         <div className="absolute -top-4 -right-4 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl"></div>
       </div>
 
@@ -142,7 +142,7 @@ const DashboardHome = () => {
           <p className="text-slate-600 dark:text-slate-400 text-sm mb-6">
             {stats.loading
               ? 'Fetching your link activity.'
-              : 'Create your first deadman link to start tracking and monitoring.'}
+              : 'Create your first vanishlink link to start tracking and monitoring.'}
           </p>
           <Button onClick={() => navigate('/dashboard/links')}>
             Create First Link

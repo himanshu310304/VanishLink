@@ -305,7 +305,7 @@ const Settings = () => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'deadman-link-export.json';
+      a.download = 'vanishlink-link-export.json';
       a.click();
       URL.revokeObjectURL(url);
 

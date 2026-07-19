@@ -1,11 +1,11 @@
-# Deadman Link - Project Overview & Interview Guide
+# VanishLink - Project Overview & Interview Guide
 
-This document provides a comprehensive breakdown of the Deadman Link project. It is designed to explain the core concept, the problems it solves, its advantages and disadvantages, and includes a dedicated section for technical interviews to help you explain the project to recruiters or engineering managers.
+This document provides a comprehensive breakdown of the VanishLink project. It is designed to explain the core concept, the problems it solves, its advantages and disadvantages, and includes a dedicated section for technical interviews to help you explain the project to recruiters or engineering managers.
 
 ---
 
 ## 1. What is this project?
-**Deadman Link** is a highly secure, time-sensitive URL sharing and secret management platform. It allows users to create encrypted links that only become active under specific conditions (like a timer) or self-destruct after being viewed or after a certain time expires.
+**VanishLink** is a highly secure, time-sensitive URL sharing and secret management platform. It allows users to create encrypted links that only become active under specific conditions (like a timer) or self-destruct after being viewed or after a certain time expires.
 
 It acts as a digital "Dead Man's Switch" for data: if the creator doesn't intervene, or if a timer runs out, the data is automatically released, destroyed, or locked behind a password.
 
@@ -22,8 +22,8 @@ The core functionality of the platform includes:
 ## 3. What problems does it solve?
 In the modern digital age, sharing sensitive information (passwords, API keys, private documents, whistleblowing data) over standard messaging apps or email is inherently insecure. 
 
-**Deadman Link solves:**
-1. **The "Forever Data" Problem:** Messages in Slack or Email live forever. If an account is hacked years later, old secrets are exposed. Deadman links guarantee the data is deleted from the universe after it is read.
+**VanishLink solves:**
+1. **The "Forever Data" Problem:** Messages in Slack or Email live forever. If an account is hacked years later, old secrets are exposed. VanishLink links guarantee the data is deleted from the universe after it is read.
 2. **Unauthorized Forwarding:** If you send a sensitive link to a contractor, they could forward it to someone else. With single-view self-destructing links, if a second person clicks it, the data is already gone.
 3. **Future Information Release:** If a user wants to ensure data (like a will, a press release, or a timed announcement) is only accessible *after* a specific time, regardless of whether the user is online to send it.
 
@@ -68,4 +68,4 @@ If you are discussing this project in a software engineering interview, here are
 *Answer:* "I implemented Role-Based Access Control (RBAC). When a user logs in, the backend issues a JWT (JSON Web Token). The payload of this token contains their role (`user` vs `admin`). Every request to an `/api/admin/*` route passes through an `AdminRoute` middleware that strictly verifies the JWT signature and checks if the role is exactly 'admin'. Furthermore, the React frontend also has Protected Routes that kick non-admins back to the homepage."
 
 **Q4: How did you solve the problem of the React Router catching backend API requests?**
-*Answer:* "I kept a strict separation of paths. The Express backend serves API requests exclusively under the `/api/` prefix. The React router handles everything else. For the dynamic link redirecter (e.g., `deadman.com/my-secret`), I put a catch-all route `/:slug` at the very bottom of my React Router. It reads the slug, pings the backend `GET /api/links/:slug`, and if the link is valid, redirects the user."
+*Answer:* "I kept a strict separation of paths. The Express backend serves API requests exclusively under the `/api/` prefix. The React router handles everything else. For the dynamic link redirecter (e.g., `vanishlink.com/my-secret`), I put a catch-all route `/:slug` at the very bottom of my React Router. It reads the slug, pings the backend `GET /api/links/:slug`, and if the link is valid, redirects the user."

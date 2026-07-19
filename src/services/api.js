@@ -5,7 +5,7 @@ import axios from 'axios';
 const API_URL =
   import.meta.env.VITE_API_URL || 'http://localhost:5050/api';
 
-console.log('[Deadman-Link] API_URL =', API_URL);
+console.log('[VanishLink] API_URL =', API_URL);
 
 const api = axios.create({
   baseURL: API_URL,

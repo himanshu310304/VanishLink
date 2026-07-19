@@ -12,7 +12,7 @@ const ROLE_DEFINITIONS = [
     label: 'Regular',
     description: 'Safe default for most users.',
     features: [
-      'Create Deadman Links',
+      'Create VanishLinks',
       'Basic link analytics',
       'Join Watch Parties',
     ],

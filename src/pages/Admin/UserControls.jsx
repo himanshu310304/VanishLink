@@ -326,7 +326,7 @@ const UserControls = () => {
             </h2>
             <p className="text-xs text-slate-600 dark:text-slate-400">
               Each role comes with a fixed set of capabilities. Updating a
-              user’s role instantly changes what they can do in Deadman.
+              user’s role instantly changes what they can do in VanishLink.
             </p>
           </div>
 

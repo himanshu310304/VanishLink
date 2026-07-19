@@ -105,7 +105,7 @@ const AdminRegister = () => {
       <div className="absolute top-6 left-6 md:top-8 md:left-8 z-50">
         <Link to="/" className="flex items-center gap-2 text-emerald-500 font-bold text-xl tracking-tighter group cursor-pointer hover:scale-105 transition-transform">
           <Shield className="w-6 h-6 fill-emerald-500/20 group-hover:rotate-12 transition-transform duration-500" />
-          <span className="tracking-[0.2em]">DEADMAN</span>
+          <span className="tracking-[0.2em]">VANISHLINK</span>
         </Link>
       </div>
 
@@ -180,7 +180,7 @@ const AdminRegister = () => {
               </label>
               <Input
                 type="email"
-                placeholder="root@deadman.sys"
+                placeholder="root@vanishlink.sys"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 className="font-mono bg-slate-50 dark:bg-black/50 border-red-200 dark:border-red-900/50 text-red-100 placeholder:text-slate-600"

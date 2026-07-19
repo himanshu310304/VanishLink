@@ -72,7 +72,7 @@ export const Navbar = () => {
                       <ShieldAlert className="w-4 h-4 text-emerald-500" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-slate-900 dark:text-white">Welcome to Deadman</p>
+                      <p className="text-sm font-medium text-slate-900 dark:text-white">Welcome to VanishLink</p>
                       <p className="text-xs text-slate-500 mt-0.5">Your secure link management system is ready to use.</p>
                       <p className="text-[10px] text-slate-400 mt-1">Just now</p>
                     </div>

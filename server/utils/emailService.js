@@ -18,8 +18,8 @@ async function sendOTP(email, code, purpose = 'otp') {
   const transporter = buildTransport();
   const subject =
     purpose === 'reset'
-      ? 'Your Deadman-Link password reset code'
-      : 'Your Deadman-Link verification code';
+      ? 'Your VanishLink password reset code'
+      : 'Your VanishLink verification code';
   const text = `Your code is ${code}. It expires in 10 minutes.`;
 
   if (!transporter) {

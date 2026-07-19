@@ -1,8 +1,8 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import api from '../services/api';
 
-const STORAGE_USER = 'deadman_user';
-const STORAGE_TOKEN = 'deadman_token';
+const STORAGE_USER = 'vanishlink_user';
+const STORAGE_TOKEN = 'vanishlink_token';
 
 export const AuthContext = createContext();
 
