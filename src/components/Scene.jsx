@@ -6,7 +6,7 @@ import * as THREE from 'three';
 const AnimatedShapes = () => {
   const sphereRef1 = useRef(null);
   const sphereRef2 = useRef(null);
-  
+
   // Rotate shapes slowly over time
   useFrame((state, delta) => {
     if (sphereRef1.current) {
@@ -28,11 +28,11 @@ const AnimatedShapes = () => {
       {/* Floating abstract emerald sphere */}
       <Float speed={2} rotationIntensity={1} floatIntensity={2}>
         <Sphere ref={sphereRef1} args={[1.5, 64, 64]} position={[-3, 1, -2]}>
-          <MeshDistortMaterial 
+          <MeshDistortMaterial
             color="#059669" // Emerald 600
-            attach="material" 
-            distort={0.4} 
-            speed={2} 
+            attach="material"
+            distort={0.4}
+            speed={2}
             roughness={0.2}
             metalness={0.8}
             wireframe={true}
@@ -43,11 +43,11 @@ const AnimatedShapes = () => {
       {/* Secondary floating sphere */}
       <Float speed={3} rotationIntensity={2} floatIntensity={1.5}>
         <Sphere ref={sphereRef2} args={[1, 32, 32]} position={[4, -2, -4]}>
-          <MeshDistortMaterial 
+          <MeshDistortMaterial
             color="#ef4444" // Red 500
-            attach="material" 
-            distort={0.6} 
-            speed={1.5} 
+            attach="material"
+            distort={0.6}
+            speed={1.5}
             roughness={0.1}
             metalness={1}
             opacity={0.7}
@@ -65,7 +65,7 @@ const AnimatedShapes = () => {
 export const Scene = () => {
   return (
     <div className="absolute inset-0 z-0 pointer-events-none">
-      <Canvas 
+      <Canvas
         camera={{ position: [0, 0, 5], fov: 45 }}
         gl={{ alpha: true, antialias: true }}
       >

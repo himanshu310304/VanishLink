@@ -23,25 +23,25 @@ const LandingPage = () => {
     // Hero Entrance Animation
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
-    tl.fromTo('.hero-badge', 
-      { y: 20, opacity: 0 }, 
+    tl.fromTo('.hero-badge',
+      { y: 20, opacity: 0 },
       { y: 0, opacity: 1, duration: 0.8 }
     )
-    .fromTo(heroTextRef.current, 
-      { y: 50, opacity: 0, scale: 0.95 },
-      { y: 0, opacity: 1, scale: 1, duration: 1 },
-      '-=0.4'
-    )
-    .fromTo(heroSubRef.current,
-      { y: 20, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.8 },
-      '-=0.6'
-    )
-    .fromTo(heroBtnsRef.current.children,
-      { y: 20, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.6, stagger: 0.1 },
-      '-=0.4'
-    );
+      .fromTo(heroTextRef.current,
+        { y: 50, opacity: 0, scale: 0.95 },
+        { y: 0, opacity: 1, scale: 1, duration: 1 },
+        '-=0.4'
+      )
+      .fromTo(heroSubRef.current,
+        { y: 20, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.8 },
+        '-=0.6'
+      )
+      .fromTo(heroBtnsRef.current.children,
+        { y: 20, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.6, stagger: 0.1 },
+        '-=0.4'
+      );
 
     // Feature Cards Scroll Animation
     gsap.fromTo('.feature-card',
@@ -122,7 +122,7 @@ const LandingPage = () => {
   return (
     <div ref={container} className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 font-sans selection:bg-emerald-500/30 overflow-x-hidden relative">
       <style>{styles}</style>
-      
+
       {/* 3D Scene Background */}
       <Scene />
 
@@ -160,14 +160,14 @@ const LandingPage = () => {
             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
             SYSTEM OPERATIONAL V2.0
           </div>
-          
+
           <h1 ref={heroTextRef} className="text-5xl md:text-7xl font-bold text-slate-900 dark:text-white tracking-tight mb-6 leading-tight opacity-0">
             Intelligent Links That <br />
             <span className="glitch-text text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500" data-text="Self-Destruct & Adapt">
               Self-Destruct & Adapt.
             </span>
           </h1>
-          
+
           <p ref={heroSubRef} className="text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-10 max-w-2xl mx-auto leading-relaxed opacity-0">
             The ultimate tool for secure communications. Create password-protected, time-sensitive links that vanish after use. Used by operatives, journalists, and privacy advocates worldwide.
           </p>
@@ -254,11 +254,11 @@ const FeatureCard = ({ icon: Icon, title, desc, color, bg, className = '' }) => 
   <div className={`p-6 rounded-xl bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border border-slate-200/50 dark:border-slate-800/50 hover:border-emerald-500/50 relative overflow-hidden group transition-colors duration-300 shadow-xl ${className}`}>
     {/* Glow effect on hover */}
     <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-    
+
     <div className={`w-14 h-14 rounded-xl border border-slate-200/50 dark:border-slate-800/50 flex items-center justify-center mb-4 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 ${bg}`}>
       <Icon className={`w-7 h-7 ${color}`} />
     </div>
-    
+
     <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3 group-hover:text-emerald-400 transition-colors">{title}</h3>
     <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed relative z-10 group-hover:text-slate-800 dark:group-hover:text-slate-200 transition-colors">
       {desc}
