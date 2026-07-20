@@ -7,7 +7,7 @@ const https = require('https'); // for webhook requests
 const { Server } = require('socket.io');
 require('dotenv').config();
 
-const watchRoutes = require('./routes/watchRoutes');
+
 const analyticsRoutes = require('./routes/analyticsRoutes');
 const Link = require('./models/Link');
 const AnalyticsEvent = require('./models/AnalyticsEvent');
@@ -74,8 +74,7 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-// watch party REST routes (protected)
-app.use('/api/watch', authenticate, watchRoutes);
+
 
 // analytics REST routes (REAL data) - protected
 app.use('/api/analytics', authenticate, analyticsRoutes);
@@ -654,6 +653,11 @@ app.get('/r/:slug', redirectLimiter, detectDirectAccessAttempt, async (req, res)
       } else if (urlObj.hostname === 'youtu.be') {
         const v = urlObj.pathname.slice(1);
         if (v) cloakUrl = `https://www.youtube.com/embed/${v}?autoplay=1`;
+      } else if (urlObj.hostname === 'drive.google.com') {
+        if (urlObj.pathname.endsWith('/view')) {
+          urlObj.pathname = urlObj.pathname.replace(/\/view$/, '/preview');
+          cloakUrl = urlObj.toString();
+        }
       }
     } catch (e) {
       // Ignore URL parsing errors and fallback to original
@@ -670,37 +674,10 @@ app.get('/r/:slug', redirectLimiter, detectDirectAccessAttempt, async (req, res)
         <style>
           body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background-color: #0f172a; font-family: system-ui, -apple-system, sans-serif; }
           iframe { border: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; }
-          .fallback-bar { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(15, 23, 42, 0.95); padding: 16px 24px; z-index: 10; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #334155; backdrop-filter: blur(10px); transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1); }
-          .fallback-bar.show { transform: translateY(0); }
-          .btn { background: #3b82f6; color: white; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; transition: all 0.2s; box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3); }
-          .btn:hover { background: #2563eb; transform: translateY(-1px); }
-          .text-container { display: flex; flex-direction: column; gap: 4px; }
-          .text-title { color: #f8fafc; font-weight: 600; font-size: 14px; margin: 0; }
-          .text-desc { font-size: 13px; color: #94a3b8; margin: 0; }
-          @media (max-width: 600px) {
-            .fallback-bar { flex-direction: column; gap: 16px; text-align: center; padding: 20px; }
-            .btn { width: 100%; text-align: center; box-sizing: border-box; }
-          }
         </style>
       </head>
       <body>
         <iframe src="${cloakUrl}" allowfullscreen allow="autoplay; encrypted-media"></iframe>
-        
-        <div class="fallback-bar" id="fallback">
-          <div class="text-container">
-            <p class="text-title">Page refusing to connect or blank?</p>
-            <p class="text-desc">This website has high security that blocks hidden links.</p>
-          </div>
-          <a href="${finalTarget}" class="btn">Open Site Directly</a>
-        </div>
-
-        <script>
-          // Automatically show the fallback bar after 2 seconds
-          // This ensures that if the iframe is blocked by X-Frame-Options, the user can still proceed.
-          setTimeout(() => {
-            document.getElementById('fallback').classList.add('show');
-          }, 2000);
-        </script>
       </body>
       </html>
     `;
@@ -808,32 +785,6 @@ io.on('connection', (socket) => {
       socket.join(`user:${userId}`);
       console.log(`📡 User ${userId} joined notification room`);
     }
-  });
-
-  socket.on('join-room', ({ roomCode, userName }) => {
-    socket.join(roomCode);
-    socket.data.roomCode = roomCode;
-    socket.data.userName = userName || 'Guest';
-
-    socket.to(roomCode).emit('user-joined', {
-      userName: socket.data.userName,
-    });
-  });
-
-  socket.on('player-action', (payload) => {
-    const { roomCode } = payload;
-    if (!roomCode) return;
-    socket.to(roomCode).emit('player-action', payload);
-  });
-
-  socket.on('chat-message', ({ roomCode, userName, message }) => {
-    if (!roomCode || !message?.trim()) return;
-
-    io.to(roomCode).emit('chat-message', {
-      userName: userName || socket.data.userName || 'Guest',
-      message,
-      ts: Date.now(),
-    });
   });
 
   socket.on('disconnect', () => {

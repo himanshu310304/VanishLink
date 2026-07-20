@@ -86,7 +86,7 @@ export const AIInsightsCard = ({ data, loading }) => {
   }
 
   return (
-    <div className="bg-gradient-to-br from-indigo-900/40 to-slate-800/80 border border-indigo-500/20 rounded-xl p-6 relative overflow-hidden">
+    <div className="bg-linear-to-br from-indigo-900/40 to-slate-800/80 border border-indigo-500/20 rounded-xl p-6 relative overflow-hidden">
       <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
         <Sparkles className="w-24 h-24 text-indigo-400" />
       </div>
