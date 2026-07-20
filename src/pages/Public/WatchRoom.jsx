@@ -20,7 +20,7 @@ import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5050/api';
 const SOCKET_URL = API_BASE.replace(/\/api\/?$/, '');
 
 const WatchRoom = () => {

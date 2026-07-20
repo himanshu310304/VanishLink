@@ -7,7 +7,7 @@ import { Card } from '../../components/ui/Card';
 import { ReportLinkButton } from '../../components/links/ReportLinkButton';
 import api from '../../services/api';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5050/api';
 // remove trailing /api to get backend root
 const REDIRECT_BASE = API_BASE.replace(/\/api\/?$/, '');
 
