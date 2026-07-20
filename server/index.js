@@ -548,6 +548,56 @@ app.get('/r/:slug', redirectLimiter, async (req, res) => {
       sendWebhook(link, 'first_click');
     }
 
+    if (link.showPreview && req.query.confirm !== '1') {
+      const isFlagged = link.moderationStatus === 'flagged' || link.isFlagged;
+      const isScanned = link.safetyVerdict !== null;
+      let safetyClass = 'unknown';
+      let safetyText = 'Not Scanned';
+      if (isFlagged) {
+        safetyClass = 'flagged';
+        safetyText = 'Flagged (Potentially Unsafe)';
+      } else if (isScanned) {
+        safetyClass = 'clean';
+        safetyText = 'Scanned & Safe';
+      }
+
+      const previewHtml = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Security Preview - VanishLink</title>
+        <style>
+          body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+          .card { background: #1e293b; padding: 32px; border-radius: 16px; border: 1px solid #334155; text-align: center; max-width: 450px; width: 90%; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+          h2 { margin-top: 0; font-size: 24px; color: #f8fafc; }
+          p { color: #94a3b8; margin-bottom: 24px; font-size: 15px; line-height: 1.6; }
+          .destination { background: #0f172a; padding: 16px; border-radius: 8px; border: 1px solid #334155; word-break: break-all; color: #38bdf8; font-family: ui-monospace, monospace; font-size: 14px; margin-bottom: 24px; text-align: left; }
+          .btn { display: inline-block; background: #10b981; color: white; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; font-size: 16px; transition: background 0.2s; cursor: pointer; border: none; width: 100%; box-sizing: border-box; }
+          .btn:hover { background: #059669; }
+          .safety { display: inline-block; padding: 6px 16px; border-radius: 999px; font-size: 13px; font-weight: 600; margin-bottom: 24px; }
+          .safety.clean { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+          .safety.flagged { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+          .safety.unknown { background: rgba(234, 179, 8, 0.15); color: #eab308; border: 1px solid rgba(234, 179, 8, 0.3); }
+        </style>
+      </head>
+      <body>
+        <div class="card">
+          <h2>Security Preview</h2>
+          <p>The creator of this link has enabled preview mode. Please review the destination below before proceeding.</p>
+          <div class="safety \${safetyClass}">
+            \${safetyText}
+          </div>
+          <div class="destination">\${finalTarget}</div>
+          <a href="?confirm=1" class="btn">Continue to Destination</a>
+        </div>
+      </body>
+      </html>
+      `;
+      return res.send(previewHtml);
+    }
+
     // Helper to convert YouTube links to embeddable links so they aren't blocked by X-Frame-Options
     let cloakUrl = finalTarget;
     try {

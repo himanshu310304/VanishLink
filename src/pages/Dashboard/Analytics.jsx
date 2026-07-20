@@ -4,6 +4,7 @@ import { BarChart3, Globe, MousePointer2, Smartphone, TrendingUp } from 'lucide-
 import { StatsCard } from '../../components/analytics/StatsCard';
 import { ClickChart } from '../../components/analytics/ClickChart';
 import { GeoMap } from '../../components/analytics/GeoMap';
+import { AIInsightsCard } from '../../components/analytics/AIInsightsCard';
 import { useFetch } from '../../hooks/useFetch';
 
 const Analytics = () => {
@@ -75,8 +76,9 @@ const Analytics = () => {
         <div className="lg:col-span-2">
           <ClickChart data={timeline} loading={loading} />
         </div>
-        <div>
+        <div className="space-y-4">
           <GeoMap data={geo} loading={loading} />
+          <AIInsightsCard data={data} loading={loading} />
         </div>
       </div>
     </div>

@@ -478,7 +478,7 @@ export const CreateLinkForm = ({ onSuccess }) => {
             className={`px-4 py-2 text-sm font-medium capitalize transition-colors ${
               activeTab === tab
                 ? 'text-emerald-500 border-b-2 border-emerald-500'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:text-white'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             {tab}
@@ -509,7 +509,7 @@ export const CreateLinkForm = ({ onSuccess }) => {
                 <Button
                   type="button"
                   variant="outline"
-                  size="xs"
+                  size="sm"
                   onClick={handleScanSafety}
                   disabled={safetyLoading}
                 >
@@ -547,7 +547,7 @@ export const CreateLinkForm = ({ onSuccess }) => {
             />
 
             <div>
-              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5 uppercase tracking-wider">
+              <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">
                 Description (Optional)
               </label>
               <textarea
@@ -582,7 +582,7 @@ export const CreateLinkForm = ({ onSuccess }) => {
               />
 
               <div className="relative">
-                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5 uppercase tracking-wider">
+                <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">
                   Collection
                 </label>
                 <div className="relative">
@@ -602,9 +602,15 @@ export const CreateLinkForm = ({ onSuccess }) => {
               </div>
             </div>
 
+          </div>
+        )}
+
+        {/* SECURITY TAB */}
+        {activeTab === 'security' && (
+          <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
             {/* Visibility */}
             <div className="relative">
-              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5 uppercase tracking-wider">
+              <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">
                 Visibility
               </label>
               <select
@@ -622,12 +628,7 @@ export const CreateLinkForm = ({ onSuccess }) => {
                 </option>
               </select>
             </div>
-          </div>
-        )}
 
-        {/* SECURITY TAB */}
-        {activeTab === 'security' && (
-          <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
             <Input
               label="Password Protection"
               type="password"
@@ -662,18 +663,18 @@ export const CreateLinkForm = ({ onSuccess }) => {
 
               {!form.isOneTime && (
                 <div className="space-y-2">
-                  <label className="text-xs text-slate-500 uppercase">
-                    Max Access Count
+                  <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">
+                    Max Access Count (0 = unlimited)
                   </label>
                   <input
                     type="number"
                     className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded px-3 py-2 text-slate-900 dark:text-white text-sm"
-                    placeholder="e.g. 5 (0 for unlimited)"
-                    value={form.maxClicks}
+                    placeholder="0"
+                    value={form.maxClicks === 0 ? '' : form.maxClicks}
                     onChange={(e) =>
                       setForm({
                         ...form,
-                        maxClicks: parseInt(e.target.value, 10) || 0,
+                        maxClicks: e.target.value === '' ? 0 : parseInt(e.target.value, 10),
                       })
                     }
                   />
@@ -681,7 +682,7 @@ export const CreateLinkForm = ({ onSuccess }) => {
               )}
 
               <div className="space-y-2">
-                <label className="text-xs text-slate-500 uppercase">
+                <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">
                   Self-Destruct Date
                 </label>
                 <div className="relative">
@@ -733,7 +734,7 @@ export const CreateLinkForm = ({ onSuccess }) => {
 
             {/* Scheduled Activation */}
             <div className="space-y-2">
-              <label className="text-xs text-slate-500 uppercase">
+              <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">
                 Scheduled Activation
               </label>
               <div className="relative">
@@ -789,7 +790,7 @@ export const CreateLinkForm = ({ onSuccess }) => {
                     </p>
                     <div className="grid md:grid-cols-2 gap-3">
                       <div>
-                        <label className="block mb-1 text-[11px] uppercase text-slate-600 dark:text-slate-400">
+                        <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">
                           Mobile URL
                         </label>
                         <input
@@ -805,7 +806,7 @@ export const CreateLinkForm = ({ onSuccess }) => {
                         />
                       </div>
                       <div>
-                        <label className="block mb-1 text-[11px] uppercase text-slate-600 dark:text-slate-400">
+                        <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">
                           Desktop URL
                         </label>
                         <input
@@ -821,7 +822,7 @@ export const CreateLinkForm = ({ onSuccess }) => {
                         />
                       </div>
                       <div>
-                        <label className="block mb-1 text-[11px] uppercase text-slate-600 dark:text-slate-400">
+                        <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">
                           Tablet URL
                         </label>
                         <input
@@ -837,7 +838,7 @@ export const CreateLinkForm = ({ onSuccess }) => {
                         />
                       </div>
                       <div>
-                        <label className="block mb-1 text-[11px] uppercase text-slate-600 dark:text-slate-400">
+                        <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">
                           Bot / crawler URL
                         </label>
                         <input
@@ -867,7 +868,7 @@ export const CreateLinkForm = ({ onSuccess }) => {
                     </p>
                     <div className="grid md:grid-cols-2 gap-3">
                       <div>
-                        <label className="block mb-1 text-[11px] uppercase text-slate-600 dark:text-slate-400">
+                        <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">
                           Weekday URL (Mon–Fri)
                         </label>
                         <input
@@ -878,7 +879,7 @@ export const CreateLinkForm = ({ onSuccess }) => {
                         />
                       </div>
                       <div>
-                        <label className="block mb-1 text-[11px] uppercase text-slate-600 dark:text-slate-400">
+                        <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">
                           Weekend URL (Sat–Sun)
                         </label>
                         <input
@@ -904,7 +905,7 @@ export const CreateLinkForm = ({ onSuccess }) => {
                     </p>
                     <div className="grid md:grid-cols-[120px_120px_1fr] gap-3">
                       <div>
-                        <label className="block mb-1 text-[11px] uppercase text-slate-600 dark:text-slate-400">
+                        <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">
                           Start hour (0–23)
                         </label>
                         <input
@@ -922,7 +923,7 @@ export const CreateLinkForm = ({ onSuccess }) => {
                         />
                       </div>
                       <div>
-                        <label className="block mb-1 text-[11px] uppercase text-slate-600 dark:text-slate-400">
+                        <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">
                           End hour (0–23)
                         </label>
                         <input
@@ -940,7 +941,7 @@ export const CreateLinkForm = ({ onSuccess }) => {
                         />
                       </div>
                       <div>
-                        <label className="block mb-1 text-[11px] uppercase text-slate-600 dark:text-slate-400">
+                        <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">
                           Time window URL
                         </label>
                         <input
@@ -974,7 +975,7 @@ export const CreateLinkForm = ({ onSuccess }) => {
                     </p>
                     <div className="grid md:grid-cols-[120px_120px_1fr] gap-3">
                       <div>
-                        <label className="block mb-1 text-[11px] uppercase text-slate-600 dark:text-slate-400">
+                        <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">
                           Min clicks
                         </label>
                         <input
@@ -991,7 +992,7 @@ export const CreateLinkForm = ({ onSuccess }) => {
                         />
                       </div>
                       <div>
-                        <label className="block mb-1 text-[11px] uppercase text-slate-600 dark:text-slate-400">
+                        <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">
                           Max clicks (optional)
                         </label>
                         <input
@@ -1008,7 +1009,7 @@ export const CreateLinkForm = ({ onSuccess }) => {
                         />
                       </div>
                       <div>
-                        <label className="block mb-1 text-[11px] uppercase text-slate-600 dark:text-slate-400">
+                        <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">
                           Click range URL
                         </label>
                         <input
@@ -1054,7 +1055,7 @@ export const CreateLinkForm = ({ onSuccess }) => {
               {webhookEnabled && (
                 <div className="px-4 py-4 space-y-4 text-xs md:text-sm">
                   <div className="space-y-2">
-                    <label className="block mb-1 text-[11px] uppercase text-slate-600 dark:text-slate-400">
+                    <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">
                       Webhook URL
                     </label>
                     <input
@@ -1070,7 +1071,7 @@ export const CreateLinkForm = ({ onSuccess }) => {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="block mb-1 text-[11px] uppercase text-slate-600 dark:text-slate-400">
+                    <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">
                       Secret (optional)
                     </label>
                     <input
@@ -1262,7 +1263,7 @@ export const EditLinkForm = ({ link, onSuccess }) => {
             className={`px-4 py-2 text-sm font-medium capitalize transition-colors ${
               activeTab === tab
                 ? 'text-emerald-500 border-b-2 border-emerald-500'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:text-white'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             {tab}
@@ -1293,7 +1294,7 @@ export const EditLinkForm = ({ link, onSuccess }) => {
             />
 
             <div>
-              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5 uppercase tracking-wider">
+              <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">
                 Description (Optional)
               </label>
               <textarea
@@ -1317,7 +1318,7 @@ export const EditLinkForm = ({ link, onSuccess }) => {
             />
 
             <div className="relative">
-              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5 uppercase tracking-wider">
+              <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">
                 Collection
               </label>
               <div className="relative">
@@ -1336,9 +1337,15 @@ export const EditLinkForm = ({ link, onSuccess }) => {
               </div>
             </div>
 
+          </div>
+        )}
+
+        {/* SECURITY TAB */}
+        {activeTab === 'security' && (
+          <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
             {/* Visibility */}
             <div className="relative">
-              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5 uppercase tracking-wider">
+              <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">
                 Visibility
               </label>
               <select
@@ -1356,12 +1363,7 @@ export const EditLinkForm = ({ link, onSuccess }) => {
                 </option>
               </select>
             </div>
-          </div>
-        )}
 
-        {/* SECURITY TAB */}
-        {activeTab === 'security' && (
-          <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
             <Input
               label="Password Protection"
               type="password"
@@ -1396,18 +1398,18 @@ export const EditLinkForm = ({ link, onSuccess }) => {
 
               {!form.isOneTime && (
                 <div className="space-y-2">
-                  <label className="text-xs text-slate-500 uppercase">
+                  <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">
                     Max Access Count (0 = unlimited)
                   </label>
                   <input
                     type="number"
                     className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded px-3 py-2 text-slate-900 dark:text-white text-sm"
-                    placeholder="e.g. 5 (0 for unlimited)"
-                    value={form.maxClicks}
+                    placeholder="0"
+                    value={form.maxClicks === 0 ? '' : form.maxClicks}
                     onChange={(e) =>
                       setForm({
                         ...form,
-                        maxClicks: parseInt(e.target.value, 10) || 0,
+                        maxClicks: e.target.value === '' ? 0 : parseInt(e.target.value, 10),
                       })
                     }
                   />
@@ -1415,7 +1417,7 @@ export const EditLinkForm = ({ link, onSuccess }) => {
               )}
 
               <div className="space-y-2">
-                <label className="text-xs text-slate-500 uppercase">
+                <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">
                   Self-Destruct Date
                 </label>
                 <div className="relative">

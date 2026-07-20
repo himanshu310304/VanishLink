@@ -1,7 +1,7 @@
 // server/routes/securityRoutes.js
 const express = require('express');
 // 🔁 use the same heuristic scanner used in index.js
-const { computeLinkSafetyForUrl } = require('../scripts/safetyScanner');
+const { basicUrlSafetyCheck } = require('../scripts/urlSafety');
 
 const router = express.Router();
 
@@ -25,7 +25,7 @@ router.post('/scan-url', (req, res) => {
         .json({ message: 'security-scan: url is required' }); // 👈 UNIQUE MESSAGE
     }
 
-    const result = computeLinkSafetyForUrl(finalUrl);
+    const result = basicUrlSafetyCheck(finalUrl);
     return res.json(result);
   } catch (err) {
     console.error('URL safety scan failed:', err);
