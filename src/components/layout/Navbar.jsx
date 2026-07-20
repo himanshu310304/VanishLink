@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 
 export const Navbar = () => {
   const { user, logout } = useAuth();
-  
+
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [hasUnread, setHasUnread] = useState(true);
@@ -43,10 +43,10 @@ export const Navbar = () => {
       {/* Right Side Actions */}
       <div className="flex items-center gap-4 ml-auto relative">
         <ThemeToggle />
-        
+
         {/* Notification Bell */}
         <div className="relative" ref={notifRef}>
-          <button 
+          <button
             onClick={handleNotificationClick}
             className="relative p-2 text-slate-600 dark:text-slate-400 hover:text-emerald-400 transition-colors hover:bg-slate-700/30 rounded-lg duration-200"
           >
@@ -55,7 +55,7 @@ export const Navbar = () => {
               <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-emerald-500 rounded-full shadow-lg shadow-emerald-500/50 animate-pulse"></span>
             )}
           </button>
-          
+
           {/* Notifications Dropdown */}
           {showNotifications && (
             <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl py-2 z-50 overflow-hidden transform origin-top-right transition-all animate-in fade-in zoom-in-95 duration-200">
@@ -116,7 +116,7 @@ export const Navbar = () => {
                 <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{user?.name}</p>
                 <p className="text-xs text-slate-500 truncate">{user?.email}</p>
               </div>
-              
+
               <Link to="/dashboard/settings" className="flex items-center gap-2 px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors" onClick={() => setShowProfileMenu(false)}>
                 <Settings className="w-4 h-4" />
                 Profile Settings
@@ -125,9 +125,9 @@ export const Navbar = () => {
                 <ShieldAlert className="w-4 h-4" />
                 Security
               </Link>
-              
+
               <div className="h-px bg-slate-200 dark:bg-slate-800 my-2"></div>
-              
+
               <button onClick={() => { setShowProfileMenu(false); logout(); }} className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">
                 <LogOut className="w-4 h-4" />
                 Sign Out

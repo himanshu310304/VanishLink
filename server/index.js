@@ -110,9 +110,9 @@ app.use('/api/links', linkRoutes);
 app.get('/api/links/public', authenticate, async (req, res) => {
   try {
     const links = await Link.find({})
-    .sort({ createdAt: -1 })
-    .limit(500) // Limit to prevent overwhelming the client
-    .select('_id slug targetUrl title clicks createdAt ownerEmail password showPreview isOneTime maxClicks collection status');
+      .sort({ createdAt: -1 })
+      .limit(500) // Limit to prevent overwhelming the client
+      .select('_id slug targetUrl title clicks createdAt ownerEmail password showPreview isOneTime maxClicks collection status');
 
     console.log(`📊 Fetched ${links.length} public links`);
     res.json(links);
@@ -237,7 +237,7 @@ app.post('/api/links', authenticate, linkCreationLimiter, async (req, res) => {
         .json({ message: 'destination url is required' }); // 🔴 new text
     }
     const finalVisibility =
-  visibility === 'private' ? 'private' : 'public';
+      visibility === 'private' ? 'private' : 'public';
 
 
     // 🧠 run heuristic safety scan for this URL
@@ -282,7 +282,7 @@ app.post('/api/links', authenticate, linkCreationLimiter, async (req, res) => {
       ownerEmail: ownerEmail || null,
       isFavorite: false,
 
-       visibility: finalVisibility,
+      visibility: finalVisibility,
 
       conditionalRedirect: conditionalRedirect || undefined,
       webhookConfig: webhookConfig || undefined,
@@ -351,9 +351,9 @@ app.put('/api/links/:id', authenticate, async (req, res) => {
       link.webhookConfig = webhookConfig;
     }
     if (visibility !== undefined) {
-  link.visibility =
-    visibility === 'private' ? 'private' : 'public';
-}
+      link.visibility =
+        visibility === 'private' ? 'private' : 'public';
+    }
 
 
     const updated = await link.save();
@@ -500,7 +500,7 @@ function sendWebhook(link, eventType, extra = {}) {
         'Content-Length': Buffer.byteLength(payload),
       },
     },
-    () => {}
+    () => { }
   );
 
   req.write(payload);

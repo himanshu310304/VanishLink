@@ -188,8 +188,8 @@ export const CreateLinkForm = ({ onSuccess }) => {
       const normalizedMaxClicks = form.isOneTime
         ? 1
         : form.maxClicks > 0
-        ? form.maxClicks
-        : 0;
+          ? form.maxClicks
+          : 0;
 
       // build conditionalRedirect from dynamic rules state
       let conditionalRedirect;
@@ -208,28 +208,28 @@ export const CreateLinkForm = ({ onSuccess }) => {
           },
           timeOfDayRules:
             timeRule.url &&
-            timeRule.startHour !== '' &&
-            timeRule.endHour !== ''
+              timeRule.startHour !== '' &&
+              timeRule.endHour !== ''
               ? [
-                  {
-                    startHour: Number(timeRule.startHour),
-                    endHour: Number(timeRule.endHour),
-                    url: timeRule.url,
-                  },
-                ]
+                {
+                  startHour: Number(timeRule.startHour),
+                  endHour: Number(timeRule.endHour),
+                  url: timeRule.url,
+                },
+              ]
               : [],
           clickRules: clickRule.url
             ? [
-                {
-                  minClicks: clickRule.minClicks
-                    ? Number(clickRule.minClicks)
-                    : 0,
-                  maxClicks: clickRule.maxClicks
-                    ? Number(clickRule.maxClicks)
-                    : null,
-                  url: clickRule.url,
-                },
-              ]
+              {
+                minClicks: clickRule.minClicks
+                  ? Number(clickRule.minClicks)
+                  : 0,
+                maxClicks: clickRule.maxClicks
+                  ? Number(clickRule.maxClicks)
+                  : null,
+                url: clickRule.url,
+              },
+            ]
             : [],
         };
       }
@@ -475,11 +475,10 @@ export const CreateLinkForm = ({ onSuccess }) => {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 text-sm font-medium capitalize transition-colors ${
-              activeTab === tab
+            className={`px-4 py-2 text-sm font-medium capitalize transition-colors ${activeTab === tab
                 ? 'text-emerald-500 border-b-2 border-emerald-500'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
+              }`}
           >
             {tab}
           </button>
@@ -712,11 +711,10 @@ export const CreateLinkForm = ({ onSuccess }) => {
               }
             >
               <div
-                className={`mt-1 w-5 h-5 rounded border flex items-center justify-center ${
-                  form.showPreview
+                className={`mt-1 w-5 h-5 rounded border flex items-center justify-center ${form.showPreview
                     ? 'bg-emerald-500 border-emerald-500'
                     : 'border-slate-600'
-                }`}
+                  }`}
               >
                 {form.showPreview && (
                   <Eye className="w-3 h-3 text-slate-950" />
@@ -753,7 +751,7 @@ export const CreateLinkForm = ({ onSuccess }) => {
               </p>
             </div>
 
-             {/* 🔥 Dynamic redirect rules */}
+            {/* 🔥 Dynamic redirect rules */}
             <section className="mt-2 border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900">
               <header className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-800">
                 <div>
@@ -1170,7 +1168,7 @@ export const CreateLinkForm = ({ onSuccess }) => {
 };
 
 
-       
+
 
 /* ===========================
    EDIT LINK FORM
@@ -1260,11 +1258,10 @@ export const EditLinkForm = ({ link, onSuccess }) => {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 text-sm font-medium capitalize transition-colors ${
-              activeTab === tab
+            className={`px-4 py-2 text-sm font-medium capitalize transition-colors ${activeTab === tab
                 ? 'text-emerald-500 border-b-2 border-emerald-500'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
+              }`}
           >
             {tab}
           </button>
@@ -1446,11 +1443,10 @@ export const EditLinkForm = ({ link, onSuccess }) => {
               }
             >
               <div
-                className={`mt-1 w-5 h-5 rounded border flex items-center justify-center ${
-                  form.showPreview
+                className={`mt-1 w-5 h-5 rounded border flex items-center justify-center ${form.showPreview
                     ? 'bg-emerald-500 border-emerald-500'
                     : 'border-slate-600'
-                }`}
+                  }`}
               >
                 {form.showPreview && (
                   <Eye className="w-3 h-3 text-slate-950" />
