@@ -10,7 +10,6 @@ import {
   Menu, 
   X, 
   Shield,
-  Video,
   Globe,
   Flag
 } from 'lucide-react';
@@ -115,14 +114,7 @@ const DashboardLayout = () => {
               onClick={() => setIsMobileMenuOpen(false)}
             />
 
-            {/* ⭐ NEW WATCH PARTY TAB */}
-            <SidebarItem 
-              icon={Video} 
-              label="Watch Party" 
-              to="/dashboard/watch"
-              active={location.pathname.startsWith('/dashboard/watch')}
-              onClick={() => setIsMobileMenuOpen(false)}
-            />
+
 
           </div>
 

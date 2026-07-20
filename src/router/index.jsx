@@ -14,7 +14,6 @@ import AdminRegister from '../pages/Auth/AdminRegister';
 import LandingPage from '../pages/LandingPage';
 import RedirectHandler from '../pages/Public/RedirectHandler';
 import NotFound from '../pages/NotFound';
-import WatchRoom from '../pages/Public/WatchRoom'; // ✅ NEW
 
 // User Dashboard
 import DashboardLayout from '../components/layout/DashboardLayout';
@@ -24,7 +23,6 @@ import Browse from '../pages/Dashboard/Browse';
 import MyReports from '../pages/Dashboard/MyReports';
 import Analytics from '../pages/Dashboard/Analytics';
 import Settings from '../pages/Dashboard/Settings';
-import WatchParty from '../pages/Dashboard/WatchParty'; // ✅ NEW
 
 // Admin Dashboard
 import AdminLayout from '../components/layout/AdminLayout';
@@ -79,8 +77,6 @@ const AppRouter = () => {
         <Route path="my-reports" element={<MyReports />} />
         <Route path="analytics" element={<Analytics />} />
         <Route path="settings" element={<Settings />} />
-        {/* ✅ new watch party creator */}
-        <Route path="watch" element={<WatchParty />} />
       </Route>
 
       {/* Admin Dashboard */}
@@ -101,8 +97,6 @@ const AppRouter = () => {
         <Route path="settings" element={<SystemSettings />} />
       </Route>
 
-      {/* Public watch room */}
-      <Route path="/watch/:roomCode" element={<WatchRoom />} />
 
       <Route path="/:slug" element={<RedirectHandler />} />
       <Route path="*" element={<NotFound />} />

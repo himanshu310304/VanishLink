@@ -7,7 +7,7 @@ const https = require('https'); // for webhook requests
 const { Server } = require('socket.io');
 require('dotenv').config();
 
-const watchRoutes = require('./routes/watchRoutes');
+
 const analyticsRoutes = require('./routes/analyticsRoutes');
 const Link = require('./models/Link');
 const AnalyticsEvent = require('./models/AnalyticsEvent');
@@ -66,8 +66,7 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-// watch party REST routes (protected)
-app.use('/api/watch', authenticate, watchRoutes);
+
 
 // analytics REST routes (REAL data) - protected
 app.use('/api/analytics', authenticate, analyticsRoutes);
@@ -661,31 +660,6 @@ app.set('io', io);
 io.on('connection', (socket) => {
   console.log('🔌 Client connected:', socket.id);
 
-  socket.on('join-room', ({ roomCode, userName }) => {
-    socket.join(roomCode);
-    socket.data.roomCode = roomCode;
-    socket.data.userName = userName || 'Guest';
-
-    socket.to(roomCode).emit('user-joined', {
-      userName: socket.data.userName,
-    });
-  });
-
-  socket.on('player-action', (payload) => {
-    const { roomCode } = payload;
-    if (!roomCode) return;
-    socket.to(roomCode).emit('player-action', payload);
-  });
-
-  socket.on('chat-message', ({ roomCode, userName, message }) => {
-    if (!roomCode || !message?.trim()) return;
-
-    io.to(roomCode).emit('chat-message', {
-      userName: userName || socket.data.userName || 'Guest',
-      message,
-      ts: Date.now(),
-    });
-  });
 
   socket.on('disconnect', () => {
     console.log('🔌 Client disconnected:', socket.id);
