@@ -15,6 +15,7 @@ import LandingPage from '../pages/LandingPage';
 import RedirectHandler from '../pages/Public/RedirectHandler';
 import NotFound from '../pages/NotFound';
 import WatchRoom from '../pages/Public/WatchRoom'; // ✅ NEW
+import InvitationGate from '../pages/InvitationGate'; // ✅ NEW Zero-Trust Gate
 
 // User Dashboard
 import DashboardLayout from '../components/layout/DashboardLayout';
@@ -25,6 +26,7 @@ import MyReports from '../pages/Dashboard/MyReports';
 import Analytics from '../pages/Dashboard/Analytics';
 import Settings from '../pages/Dashboard/Settings';
 import WatchParty from '../pages/Dashboard/WatchParty'; // ✅ NEW
+import RecipientManager from '../pages/Dashboard/RecipientManager'; // ✅ NEW Zero-Trust Creator UI
 
 // Admin Dashboard
 import AdminLayout from '../components/layout/AdminLayout';
@@ -81,6 +83,8 @@ const AppRouter = () => {
         <Route path="settings" element={<Settings />} />
         {/* ✅ new watch party creator */}
         <Route path="watch" element={<WatchParty />} />
+        {/* ✅ new recipient manager */}
+        <Route path="links/:id/recipients" element={<RecipientManager />} />
       </Route>
 
       {/* Admin Dashboard */}
@@ -103,6 +107,9 @@ const AppRouter = () => {
 
       {/* Public watch room */}
       <Route path="/watch/:roomCode" element={<WatchRoom />} />
+
+      {/* Public Zero-Trust Invitation Gate */}
+      <Route path="/invite/:token" element={<InvitationGate />} />
 
       <Route path="/:slug" element={<RedirectHandler />} />
       <Route path="*" element={<NotFound />} />

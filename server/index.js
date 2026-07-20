@@ -26,6 +26,11 @@ const securityRoutes = require('./routes/securityRoutes');
 const { basicUrlSafetyCheck } = require('./scripts/urlSafety');
 const linkRoutes = require('./routes/linkRoutes');
 
+// 🔐 Trusted Recipient & Device-Bound Secure Sharing
+const invitationsRoutes = require('./routes/invitations');
+const zeroTrustRoutes = require('./routes/zeroTrustRoutes');
+const invitationRoutes = require('./routes/invitationRoutes');
+const { detectDirectAccessAttempt } = require('./middleware/leakDetector');
 
 const app = express();
 const PORT = process.env.PORT || 5050;
@@ -33,7 +38,10 @@ const PORT = process.env.PORT || 5050;
 const passport = require('passport');
 require('./config/passport');
 
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true,
+}));
 app.use(express.json({ limit: '10mb' })); // Increase limit for base64 images
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(passport.initialize());
@@ -103,6 +111,10 @@ app.use('/api/security', securityRoutes);
 // similarity / helper link routes
 app.use('/api/links', linkRoutes);
 
+// 🔐 Secure Sharing Routes
+app.use('/api/invitations', invitationsRoutes); // Old fallback
+app.use('/api/zero-trust', zeroTrustRoutes);
+app.use('/api/links/:linkId/invitations', invitationRoutes);
 
 // ---------------- LINK CRUD ---------------- //
 
@@ -137,13 +149,20 @@ app.get('/api/links', authenticate, async (req, res) => {
 });
 
 // GET /api/links/:slug - fetch a single link with rule checks
-app.get('/api/links/:slug', async (req, res) => {
+app.get('/api/links/:slug', detectDirectAccessAttempt, async (req, res) => {
   try {
     const { slug } = req.params;
 
     const link = await Link.findOne({ slug });
     if (!link) {
       return res.status(404).json({ status: 'not_found' });
+    }
+
+    if (link.isRecipientBound) {
+      return res.status(403).json({
+        status: 'blocked',
+        reason: 'This secure link requires a valid invitation token.',
+      });
     }
 
     const now = new Date();
@@ -204,6 +223,8 @@ app.get('/api/links/:slug', async (req, res) => {
   }
 });
 
+const { requireZeroTrust } = require('./middleware/zeroTrustAuth');
+
 // POST /api/links - create a new short link (protected + rate limited)
 app.post('/api/links', authenticate, linkCreationLimiter, async (req, res) => {
   try {
@@ -226,6 +247,8 @@ app.post('/api/links', authenticate, linkCreationLimiter, async (req, res) => {
       conditionalRedirect,
       webhookConfig,
       visibility,
+      isRecipientBound,
+      allowedVerificationMethods,
     } = req.body || {};
 
     // accept either `url` or `targetUrl`
@@ -283,6 +306,12 @@ app.post('/api/links', authenticate, linkCreationLimiter, async (req, res) => {
       isFavorite: false,
 
       visibility: finalVisibility,
+      
+      // Zero-Trust configs
+      isRecipientBound: !!isRecipientBound,
+      allowedVerificationMethods: Array.isArray(allowedVerificationMethods) 
+        ? allowedVerificationMethods 
+        : (isRecipientBound ? ['email_otp'] : []),
 
       conditionalRedirect: conditionalRedirect || undefined,
       webhookConfig: webhookConfig || undefined,
@@ -319,8 +348,12 @@ app.put('/api/links/:id', authenticate, async (req, res) => {
       showPreview,
       collection,
       creatorName,
+      scheduleStart,
       conditionalRedirect,
       webhookConfig,
+      visibility,
+      isRecipientBound,
+      allowedVerificationMethods,
     } = req.body || {};
 
     const link = await Link.findById(id);
@@ -344,6 +377,9 @@ app.put('/api/links/:id', authenticate, async (req, res) => {
     if (showPreview !== undefined) link.showPreview = !!showPreview;
     if (collection !== undefined) link.collection = collection;
     if (creatorName !== undefined) link.creatorName = creatorName;
+    if (scheduleStart !== undefined)
+      link.scheduleStart = scheduleStart ? new Date(scheduleStart) : null;
+
     if (conditionalRedirect !== undefined) {
       link.conditionalRedirect = conditionalRedirect;
     }
@@ -353,6 +389,12 @@ app.put('/api/links/:id', authenticate, async (req, res) => {
     if (visibility !== undefined) {
       link.visibility =
         visibility === 'private' ? 'private' : 'public';
+    }
+    if (isRecipientBound !== undefined) {
+      link.isRecipientBound = !!isRecipientBound;
+    }
+    if (allowedVerificationMethods !== undefined) {
+      link.allowedVerificationMethods = allowedVerificationMethods;
     }
 
 
@@ -508,10 +550,14 @@ function sendWebhook(link, eventType, extra = {}) {
 }
 
 // ✅ REAL REDIRECT ENDPOINT (SAME LOGIC, CONFLICT-FREE)
-app.get('/r/:slug', redirectLimiter, async (req, res) => {
+app.get('/r/:slug', redirectLimiter, detectDirectAccessAttempt, async (req, res) => {
   try {
     const link = await Link.findOne({ slug: req.params.slug });
     if (!link) return res.status(404).send('VanishLink: Not found');
+
+    if (link.isRecipientBound) {
+      return res.status(403).send('VanishLink: This secure link requires a valid invitation token.');
+    }
 
     const now = new Date();
 
@@ -666,6 +712,76 @@ app.get('/r/:slug', redirectLimiter, async (req, res) => {
 });
 
 
+// ---------------- SECURE VIEWER ROUTE ---------------- //
+app.get('/secure-view/:token', requireZeroTrust, async (req, res) => {
+  try {
+    const { link, invitation } = req.zeroTrust;
+    const finalTarget = link.targetUrl;
+
+    let cloakUrl = finalTarget;
+    try {
+      const urlObj = new URL(finalTarget);
+      if (urlObj.hostname.includes('youtube.com') && urlObj.pathname === '/watch') {
+        const v = urlObj.searchParams.get('v');
+        if (v) cloakUrl = `https://www.youtube.com/embed/${v}?autoplay=1`;
+      } else if (urlObj.hostname === 'youtu.be') {
+        const v = urlObj.pathname.slice(1);
+        if (v) cloakUrl = `https://www.youtube.com/embed/${v}?autoplay=1`;
+      }
+    } catch (e) {
+      // Ignore
+    }
+
+    const html = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${link.title || 'VanishLink Secure View'}</title>
+        <style>
+          body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background-color: #0f172a; font-family: system-ui, -apple-system, sans-serif; }
+          iframe { border: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; }
+          .fallback-bar { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(15, 23, 42, 0.95); padding: 16px 24px; z-index: 10; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #334155; backdrop-filter: blur(10px); transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1); }
+          .fallback-bar.show { transform: translateY(0); }
+          .btn { background: #3b82f6; color: white; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; transition: all 0.2s; box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3); }
+          .btn:hover { background: #2563eb; transform: translateY(-1px); }
+          .text-container { display: flex; flex-direction: column; gap: 4px; }
+          .text-title { color: #f8fafc; font-weight: 600; font-size: 14px; margin: 0; }
+          .text-desc { font-size: 13px; color: #94a3b8; margin: 0; }
+          @media (max-width: 600px) {
+            .fallback-bar { flex-direction: column; gap: 16px; text-align: center; padding: 20px; }
+            .btn { width: 100%; text-align: center; box-sizing: border-box; }
+          }
+        </style>
+      </head>
+      <body>
+        <iframe src="${cloakUrl}" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+        
+        <div class="fallback-bar" id="fallback">
+          <div class="text-container">
+            <p class="text-title">Page refusing to connect or blank?</p>
+            <p class="text-desc">This website has high security that blocks hidden links.</p>
+          </div>
+          <a href="${finalTarget}" class="btn">Open Site Directly</a>
+        </div>
+
+        <script>
+          setTimeout(() => {
+            document.getElementById('fallback').classList.add('show');
+          }, 2000);
+        </script>
+      </body>
+      </html>
+    `;
+    return res.send(html);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('VanishLink: Internal server error');
+  }
+});
+
+
 // ---------------- SOCKET.IO ---------------- //
 
 const server = http.createServer(app);
@@ -680,8 +796,19 @@ const io = new Server(server, {
 // expose io to all routes via req.app.get('io')
 app.set('io', io);
 
+// Expose globally for notificationService real-time alerts
+global._io = io;
+
 io.on('connection', (socket) => {
   console.log('🔌 Client connected:', socket.id);
+
+  // Allow authenticated users to join their personal notification room
+  socket.on('join-user-room', (userId) => {
+    if (userId) {
+      socket.join(`user:${userId}`);
+      console.log(`📡 User ${userId} joined notification room`);
+    }
+  });
 
   socket.on('join-room', ({ roomCode, userName }) => {
     socket.join(roomCode);
