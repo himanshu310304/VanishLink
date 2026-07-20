@@ -57,10 +57,32 @@ router.post('/register/initiate', async (req, res) => {
 			return res.status(409).json({ message: 'Email already registered' });
 		}
 
+		const passwordHash = await bcrypt.hash(password, 10);
+
+		// If admin, bypass OTP and create account immediately
+		if (userRole === 'admin') {
+			const user = await User.create({
+				name,
+				email,
+				password: passwordHash,
+				role: 'admin',
+			});
+
+			const token = signToken(user);
+			return res.json({
+				token,
+				user: {
+					id: user._id,
+					name: user.name,
+					email: user.email,
+					role: user.role,
+				},
+			});
+		}
+
+		// Regular users still use OTP
 		const code = generateOTP();
 		const expiresAt = new Date(Date.now() + OTP_TTL_MINUTES * 60 * 1000);
-
-		const passwordHash = await bcrypt.hash(password, 10);
 
 		await OTP.deleteMany({ email, purpose: 'register' });
 		await OTP.create({
