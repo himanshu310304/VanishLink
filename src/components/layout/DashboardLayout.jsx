@@ -10,7 +10,6 @@ import {
   Menu, 
   X, 
   Shield,
-  Video,
   Globe,
   Flag
 } from 'lucide-react';
@@ -25,7 +24,7 @@ const SidebarItem = ({ icon: Icon, label, to, active, onClick }) => (
       "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 mb-1.5",
       active 
         ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shadow-lg shadow-emerald-500/10" 
-        : "text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:bg-slate-800/40 border border-transparent hover:border-slate-300 dark:border-slate-700/50"
+        : "text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:bg-slate-800/40 border border-transparent hover:border-slate-300 dark:border-slate-700/50"
     )}
   >
     <Icon className="w-4 h-4 shrink-0" />
@@ -115,14 +114,7 @@ const DashboardLayout = () => {
               onClick={() => setIsMobileMenuOpen(false)}
             />
 
-            {/* ⭐ NEW WATCH PARTY TAB */}
-            <SidebarItem 
-              icon={Video} 
-              label="Watch Party" 
-              to="/dashboard/watch"
-              active={location.pathname.startsWith('/dashboard/watch')}
-              onClick={() => setIsMobileMenuOpen(false)}
-            />
+
 
           </div>
 
@@ -165,7 +157,7 @@ const DashboardLayout = () => {
             <span>VanishLink</span>
           </div>
 
-          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:text-slate-200 transition-colors">
+          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">
             {isMobileMenuOpen ? <X /> : <Menu />}
           </button>
         </div>

@@ -112,20 +112,23 @@ function scoreSimilarity(targetLink, candidateLink) {
     if (targetPath === candidatePath) {
       score += 4;
       reasons.push('same-path');
-    } else if (
-      targetPath.startsWith(candidatePath) ||
-      candidatePath.startsWith(targetPath)
-    ) {
-      score += 2;
-      reasons.push('similar-path');
-    }
+    } else {
+      if (
+        targetPath.startsWith(candidatePath) ||
+        candidatePath.startsWith(targetPath)
+      ) {
+        score += 2;
+        reasons.push('similar-path');
+      }
 
-    // generic slug match (Notion / Medium / blogs etc.)
-    const targetSlug = getLastSlug(targetPath);
-    const candidateSlug = getLastSlug(candidatePath);
-    if (targetSlug && candidateSlug && targetSlug === candidateSlug) {
-      score += 4;
-      reasons.push('same-slug');
+      // generic slug match (Notion / Medium / blogs etc.)
+      // Only apply if the full paths are different to avoid redundancy
+      const targetSlug = getLastSlug(targetPath);
+      const candidateSlug = getLastSlug(candidatePath);
+      if (targetSlug && candidateSlug && targetSlug === candidateSlug) {
+        score += 4;
+        reasons.push('same-slug');
+      }
     }
   }
 
