@@ -105,6 +105,8 @@ const AppRouter = () => {
         <Route path="settings" element={<SystemSettings />} />
       </Route>
 
+      {/* Public watch room */}
+      <Route path="/watch/:roomCode" element={<WatchRoom />} />
 
       {/* Public Zero-Trust Invitation Gate */}
       <Route path="/invite/:token" element={<InvitationGate />} />
