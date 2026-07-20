@@ -69,3 +69,15 @@ If you are discussing this project in a software engineering interview, here are
 
 **Q4: How did you solve the problem of the React Router catching backend API requests?**
 *Answer:* "I kept a strict separation of paths. The Express backend serves API requests exclusively under the `/api/` prefix. The React router handles everything else. For the dynamic link redirecter (e.g., `vanishlink.com/my-secret`), I put a catch-all route `/:slug` at the very bottom of my React Router. It reads the slug, pings the backend `GET /api/links/:slug`, and if the link is valid, redirects the user."
+
+---
+
+## 6. Future Scope
+
+While VanishLink is already a robust platform, there are several exciting avenues for future development and scaling:
+
+1. **End-to-End Encryption (E2EE):** Instead of encrypting payloads purely on the server, the frontend could encrypt the data before sending it. The decryption key could be stored in the URL hash (e.g., `vanishlink.com/secret#key123`). Since URL hashes are never sent to the server, the backend would literally be incapable of reading the stored secrets (Zero-Knowledge Architecture).
+2. **Redis Integration:** Moving the in-memory rate limiter and IP blocker to a Redis cluster. This would allow the application to scale horizontally across multiple Node.js instances behind a load balancer while sharing a centralized state of blocked IPs.
+3. **Self-Destructing File Uploads:** Expanding beyond text payloads to allow users to share encrypted files or images, utilizing AWS S3 lifecycle rules to physically delete the files when the timer expires.
+4. **Real-time Notifications:** Integrating WebSockets (Socket.io) to instantly notify the sender the exact millisecond their recipient opens the self-destructing link.
+5. **Two-Factor Authentication (2FA):** Implementing TOTP-based (Authenticator App) two-factor authentication for both standard users and admin accounts to further harden account security.
