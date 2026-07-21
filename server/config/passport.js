@@ -23,7 +23,7 @@ if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
             return done(new Error('No email from Google'), null);
           }
 
-          const state = req.query.state; // 'login', 'register', or 'admin'
+          const state = req.query.state; // 'login' or 'register'
           let user = await User.findOne({ email });
 
           // LOGIN FLOW: User must exist AND must be regular user (not admin)
@@ -60,24 +60,6 @@ if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
             return done(null, user);
           }
 
-          // ADMIN FLOW: Login if exists, create with admin role if not
-          if (state === 'admin') {
-            if (!user) {
-              user = await User.create({
-                name: profile.displayName || email.split('@')[0],
-                email,
-                authProvider: 'google',
-                providerId: profile.id,
-                password: null,
-                role: 'admin',
-              });
-            } else if (user.role !== 'admin') {
-              return done(null, false, { message: 'not_admin' });
-            }
-            user.lastLoginAt = new Date();
-            await user.save();
-            return done(null, user);
-          }
 
           // FALLBACK: No state provided (shouldn't happen)
           return done(new Error('Invalid OAuth state'), null);

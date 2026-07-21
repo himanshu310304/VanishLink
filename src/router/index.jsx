@@ -9,6 +9,7 @@ import ForgotPassword from '../pages/Auth/ForgotPassword';
 import OAuthCallback from '../pages/Auth/OAuthCallback';
 import AdminLogin from '../pages/Auth/AdminLogin';
 import AdminRegister from '../pages/Auth/AdminRegister';
+import AdminForgotPassword from '../pages/Auth/AdminForgotPassword';
 
 // Public Pages
 import LandingPage from '../pages/LandingPage';
@@ -62,6 +63,7 @@ const AppRouter = () => {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/admin/login" element={<AdminLogin />} />
       <Route path="/admin/register" element={<AdminRegister />} />
+      <Route path="/admin/forgot-password" element={<AdminForgotPassword />} />
       <Route path="/oauth/callback" element={<OAuthCallback />} />
 
       {/* User Dashboard */}

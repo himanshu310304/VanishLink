@@ -455,24 +455,6 @@ router.get('/google/register', async (req, res, next) => {
 	passport.authenticate('google', { scope: ['profile', 'email'], session: false, state: 'register' })(req, res, next);
 });
 
-// Google OAuth - Admin Login
-router.get('/google/admin', async (req, res, next) => {
-	if (!isGoogleConfigured()) {
-		console.log('⚠️ Google OAuth is not configured on the server. Simulating Google Admin Login...');
-		try {
-			const user = await getOrCreateMockUser('google-admin@example.com', 'Mock Google Admin', 'admin');
-			user.lastLoginAt = new Date();
-			await user.save();
-			
-			const token = signToken(user);
-			return res.redirect(`${FRONTEND_URL}/oauth/callback?token=${token}`);
-		} catch (err) {
-			console.error('Mock Google Admin login failed:', err);
-			return res.redirect(`${FRONTEND_URL}/login?error=oauth_failed`);
-		}
-	}
-	passport.authenticate('google', { scope: ['profile', 'email'], session: false, state: 'admin' })(req, res, next);
-});
 
 router.get('/google/callback', (req, res, next) => {
 	if (!isGoogleConfigured()) {
@@ -495,10 +477,7 @@ router.get('/google/callback', (req, res, next) => {
 				console.log('❌ Account exists - redirecting to register');
 				return res.redirect(`${FRONTEND_URL}/register?error=account_exists`);
 			}
-			if (info?.message === 'not_admin') {
-				console.log('❌ Not admin - redirecting to admin login');
-				return res.redirect(`${FRONTEND_URL}/admin/login?error=not_admin`);
-			}
+
 			if (info?.message === 'use_admin_login') {
 				console.log('🔐 Admin using user login - redirecting with error');
 				console.log('📍 Redirect URL:', `${FRONTEND_URL}/login?error=use_admin_login`);
