@@ -544,6 +544,20 @@ app.get('/r/:slug', redirectLimiter, async (req, res) => {
     link.clicks = nextClicks;
     await link.save();
 
+    // Record Analytics Event
+    try {
+      await AnalyticsEvent.create({
+        link: link._id,
+        slug: link.slug,
+        ip: req.ip || req.socket.remoteAddress || 'unknown',
+        userAgent,
+        deviceType,
+        country: req.headers['cf-ipcountry'] || req.headers['x-vercel-ip-country'] || 'Unknown'
+      });
+    } catch (analyticsErr) {
+      console.error('Failed to record analytics event:', analyticsErr);
+    }
+
     if (nextClicks === 1) {
       sendWebhook(link, 'first_click');
     }
