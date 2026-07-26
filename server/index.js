@@ -102,7 +102,7 @@ app.use('/api/moderation', moderationRoutes);
 app.use('/api/settings', settingsRoutes);
 
 // admin audit-log routes
-app.use('/api/admin/audit-logs', adminAuditRoutes);
+app.use('/api/admin/audit-logs', authenticate, requireAdmin, adminAuditRoutes);
 
 // security / URL scan API
 app.use('/api/security', securityRoutes);

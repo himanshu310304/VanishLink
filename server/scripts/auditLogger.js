@@ -22,11 +22,17 @@ function normalizeIp(ip) {
   return value;
 }
 
+const mongoose = require('mongoose');
+
+// Sentinel ObjectId used for system-generated audit entries (no real admin user)
+const SYSTEM_ADMIN_ID = new mongoose.Types.ObjectId('000000000000000000000000');
+
 async function logAuditEvent({
   action,
   target,
   adminName = 'System',
-  adminEmail = null,
+  adminEmail = 'system@vanishlink.app',
+  adminId = null,
   ipAddress = null,
   metadata = {},
 }) {
@@ -36,10 +42,11 @@ async function logAuditEvent({
     await AuditLog.create({
       action,
       target,
+      adminId: adminId || SYSTEM_ADMIN_ID,
       adminName,
-      adminEmail,
-      ipAddress: normalizedIp,
-      metadata,
+      adminEmail: adminEmail || 'system@vanishlink.app',
+      ip: normalizedIp || 'system',
+      details: metadata,
     });
   } catch (err) {
     console.error('Failed to create audit log:', err.message);

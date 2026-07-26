@@ -43,7 +43,7 @@ router.get('/', async (req, res) => {
 
     const total = await AuditLog.countDocuments(query);
     const logs = await AuditLog.find(query)
-      .sort({ createdAt: -1 })
+      .sort({ timestamp: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
       .lean();
@@ -61,76 +61,4 @@ router.get('/', async (req, res) => {
   }
 });
 
-/**
- * POST /api/admin/links/rescan-safety
- * Re-run the heuristic safety scanner for links that have
- * no safetyScore yet (or null), and store safetyScore + safetyVerdict.
- */
-router.post('/rescan-safety', async (req, res) => {
-  try {
-    const { onlyMissing = true } = req.body || {};
-
-    const query = onlyMissing
-      ? {
-          $or: [
-            { safetyScore: { $exists: false } },
-            { safetyScore: null },
-          ],
-        }
-      : {}; // if you ever want to rescan *everything*
-
-    const links = await Link.find(query);
-    if (!links.length) {
-      return res.json({
-        success: true,
-        updatedCount: 0,
-        message: 'No links needed safety rescan',
-      });
-    }
-
-    let updatedCount = 0;
-    const now = new Date();
-
-    for (const link of links) {
-      const safety = basicUrlSafetyCheck(link.targetUrl);
-
-      link.safetyScore = safety.score;
-      link.safetyVerdict = safety.verdict;
-      link.isFlagged = safety.flagRecommended || link.isFlagged;
-      if (safety.flagRecommended) {
-        link.flagReason =
-          link.flagReason || 'auto_flag_safety_scanner_rescan';
-        link.flaggedAt = link.flaggedAt || now;
-        link.moderationStatus =
-          link.moderationStatus === 'removed'
-            ? link.moderationStatus
-            : 'flagged';
-      }
-
-      await link.save();
-      updatedCount += 1;
-    }
-
-    await logAuditEvent({
-      action: 'RESCAN_LINK_SAFETY',
-      target: `links: ${updatedCount}`,
-      adminName: 'Admin Console',
-      ipAddress: req.ip,
-      metadata: {
-        onlyMissing,
-        updatedCount,
-      },
-    });
-
-    res.json({
-      success: true,
-      updatedCount,
-    });
-  } catch (err) {
-    console.error('Error in POST /api/admin/links/rescan-safety:', err);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
-module.exports = router; // <-- keep this as the last line
-
+module.exports = router;

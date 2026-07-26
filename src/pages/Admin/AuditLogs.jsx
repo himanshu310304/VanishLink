@@ -110,11 +110,11 @@ const AuditLogs = () => {
   // transform backend logs -> table rows
   const tableData = logs.map((log) => ({
     id: log._id,
-    time: new Date(log.createdAt).toLocaleString(),
+    time: log.timestamp ? new Date(log.timestamp).toLocaleString() : 'N/A',
     action: log.action,
-    target: log.target,
-    admin: log.adminName || 'System',
-    ip: log.ipAddress || 'Unknown',
+    target: log.target || '—',
+    admin: log.adminName || log.adminEmail || 'System',
+    ip: log.ip || '—',
   }));
 
   return (
