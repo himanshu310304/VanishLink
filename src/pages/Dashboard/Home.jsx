@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useSocket } from '../../context/SocketContext';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Button } from '../../components/ui/Button';
@@ -32,7 +33,7 @@ const DashboardHome = () => {
     try {
       await navigator.clipboard.writeText(shortUrl);
       toast.success('Short link copied to clipboard!');
-    } catch (err) {
+    } catch {
       toast.error('Failed to copy. You can copy it manually.');
     }
   };
@@ -50,14 +51,27 @@ const DashboardHome = () => {
         const clicks = links.reduce((sum, l) => sum + (l.clicks || 0), 0);
 
         setStats({ total, active, clicks, loading: false });
-      } catch (err) {
-        console.error('Failed to load stats', err);
+      } catch {
+        console.error('Failed to load stats');
         setStats({ total: 0, active: 0, clicks: 0, loading: false });
       }
     };
 
     loadStats();
   }, []);
+
+  const socket = useSocket();
+
+  useEffect(() => {
+    if (!socket) return;
+    
+    const handleNewClick = () => {
+      setStats(prev => ({ ...prev, clicks: prev.clicks + 1 }));
+    };
+
+    socket.on('user_new_click', handleNewClick);
+    return () => socket.off('user_new_click', handleNewClick);
+  }, [socket]);
 
   return (
     <div className="h-full w-full space-y-8">

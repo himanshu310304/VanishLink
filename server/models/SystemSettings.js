@@ -85,10 +85,7 @@ const systemSettingsSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  bannedKeywords: {
-    type: [String],
-    default: [],
-  },
+
   
   // Metadata
   lastUpdated: {

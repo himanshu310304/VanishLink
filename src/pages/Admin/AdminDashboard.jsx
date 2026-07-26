@@ -1,18 +1,39 @@
 // src/pages/Admin/AdminDashboard.jsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Users, Link2, Activity, Smartphone } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { StatsCard } from '../../components/analytics/StatsCard';
 import { ClickChart } from '../../components/analytics/ClickChart';
 import { useFetch } from '../../hooks/useFetch';
+import { useSocket } from '../../context/SocketContext';
 
 const AdminDashboard = () => {
   const { data, loading, error } = useFetch('/admin/overview');
+  const socket = useSocket();
+
+  const [liveClicks, setLiveClicks] = useState(0);
+
+  useEffect(() => {
+    if (data && data.totalClicks !== undefined) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setLiveClicks(data.totalClicks);
+    }
+  }, [data]);
+
+  useEffect(() => {
+    if (!socket) return;
+    
+    const handleNewClick = () => {
+      setLiveClicks(prev => prev + 1);
+    };
+
+    socket.on('admin_new_click', handleNewClick);
+    return () => socket.off('admin_new_click', handleNewClick);
+  }, [socket]);
 
   const totalLinks = data?.totalLinks ?? 0;
-  const totalClicks = data?.totalClicks ?? 0;
+  const totalClicks = liveClicks;
   const activeLinks = data?.activeLinks ?? 0;
-  const uniqueVisitors = data?.uniqueVisitors ?? 0;
   const mobilePercent = data?.mobilePercent ?? 0;
   const timeline = data?.timeline ?? [];
   const recentEvents = data?.recentEvents ?? [];

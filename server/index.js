@@ -599,6 +599,14 @@ app.get('/r/:slug', redirectLimiter, detectDirectAccessAttempt, async (req, res)
         deviceType,
         country: req.headers['cf-ipcountry'] || req.headers['x-vercel-ip-country'] || 'Unknown'
       });
+      
+      // Emit live analytics socket events
+      if (global._io) {
+        global._io.emit('admin_new_click', { linkId: link._id, slug: link.slug, clicks: nextClicks });
+        if (link.createdBy) {
+          global._io.to(`user:${link.createdBy.toString()}`).emit('user_new_click', { linkId: link._id, slug: link.slug, clicks: nextClicks });
+        }
+      }
     } catch (analyticsErr) {
       console.error('Failed to record analytics event:', analyticsErr);
     }

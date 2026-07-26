@@ -112,11 +112,7 @@ const linkSchema = new mongoose.Schema(
     showPreview: { type: Boolean, default: false },
     collection: { type: String, default: 'General' },
     scheduleStart: { type: Date, default: null },
-    visibility: {
-      type: String,
-      enum: ['public', 'private'],
-      default: 'public',
-    },
+
 
     clicks: { type: Number, default: 0 },
     status: { type: String, default: 'active' },
