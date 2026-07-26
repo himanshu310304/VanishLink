@@ -9,7 +9,7 @@ console.log('[VanishLink] API_URL =', API_URL);
 
 const api = axios.create({
   baseURL: API_URL,
-  // withCredentials: true, // enable if you later use cookies/auth
+  withCredentials: true, // Required for secure sharing device cookies
 });
 
 export default api;

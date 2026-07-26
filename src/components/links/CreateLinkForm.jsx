@@ -42,6 +42,8 @@ export const CreateLinkForm = ({ onSuccess }) => {
     collection: 'General',
     scheduleStart: '',
     visibility: 'public', // NEW
+    isRecipientBound: false,
+    allowedVerificationMethods: ['email_otp'],
   });
 
   // 🔁 Dynamic rules state
@@ -188,8 +190,8 @@ export const CreateLinkForm = ({ onSuccess }) => {
       const normalizedMaxClicks = form.isOneTime
         ? 1
         : form.maxClicks > 0
-        ? form.maxClicks
-        : 0;
+          ? form.maxClicks
+          : 0;
 
       // build conditionalRedirect from dynamic rules state
       let conditionalRedirect;
@@ -208,28 +210,28 @@ export const CreateLinkForm = ({ onSuccess }) => {
           },
           timeOfDayRules:
             timeRule.url &&
-            timeRule.startHour !== '' &&
-            timeRule.endHour !== ''
+              timeRule.startHour !== '' &&
+              timeRule.endHour !== ''
               ? [
-                  {
-                    startHour: Number(timeRule.startHour),
-                    endHour: Number(timeRule.endHour),
-                    url: timeRule.url,
-                  },
-                ]
+                {
+                  startHour: Number(timeRule.startHour),
+                  endHour: Number(timeRule.endHour),
+                  url: timeRule.url,
+                },
+              ]
               : [],
           clickRules: clickRule.url
             ? [
-                {
-                  minClicks: clickRule.minClicks
-                    ? Number(clickRule.minClicks)
-                    : 0,
-                  maxClicks: clickRule.maxClicks
-                    ? Number(clickRule.maxClicks)
-                    : null,
-                  url: clickRule.url,
-                },
-              ]
+              {
+                minClicks: clickRule.minClicks
+                  ? Number(clickRule.minClicks)
+                  : 0,
+                maxClicks: clickRule.maxClicks
+                  ? Number(clickRule.maxClicks)
+                  : null,
+                url: clickRule.url,
+              },
+            ]
             : [],
         };
       }
@@ -266,6 +268,8 @@ export const CreateLinkForm = ({ onSuccess }) => {
         scheduleStart: form.scheduleStart || undefined,
         visibility: form.visibility,
         ownerEmail: user?.email || null,
+        isRecipientBound: form.isRecipientBound,
+        allowedVerificationMethods: form.allowedVerificationMethods,
         ...(conditionalRedirect ? { conditionalRedirect } : {}),
         ...(webhookConfig ? { webhookConfig } : {}),
       };
@@ -294,6 +298,8 @@ export const CreateLinkForm = ({ onSuccess }) => {
         collection: 'General',
         scheduleStart: '',
         visibility: 'public',
+        isRecipientBound: false,
+        allowedVerificationMethods: ['email_otp'],
       });
 
       // Reset everything else
@@ -475,11 +481,10 @@ export const CreateLinkForm = ({ onSuccess }) => {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 text-sm font-medium capitalize transition-colors ${
-              activeTab === tab
+            className={`px-4 py-2 text-sm font-medium capitalize transition-colors ${activeTab === tab
                 ? 'text-emerald-500 border-b-2 border-emerald-500'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
+              }`}
           >
             {tab}
           </button>
@@ -629,6 +634,78 @@ export const CreateLinkForm = ({ onSuccess }) => {
               </select>
             </div>
 
+            {/* Zero-Trust Mode */}
+            <div
+              className="p-4 border border-slate-200 dark:border-slate-800 rounded-lg flex items-start gap-3 bg-white dark:bg-slate-900/30 hover:border-emerald-500/50 transition-colors cursor-pointer"
+              onClick={() =>
+                setForm({ ...form, isRecipientBound: !form.isRecipientBound })
+              }
+            >
+              <div
+                className={`mt-1 w-5 h-5 rounded border flex items-center justify-center ${form.isRecipientBound
+                    ? 'bg-emerald-500 border-emerald-500'
+                    : 'border-slate-600'
+                  }`}
+              >
+                {form.isRecipientBound && (
+                  <ShieldCheck className="w-3 h-3 text-slate-950" />
+                )}
+              </div>
+              <div>
+                <h4 className="text-sm font-medium text-slate-900 dark:text-white">
+                  Recipient-Bound (Zero-Trust)
+                </h4>
+                <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                  Require recipients to verify identity via Email OTP and bind to a trusted device. Regular link clicks will be denied.
+                </p>
+              </div>
+            </div>
+
+            {/* Allowed Verification Methods (Shows only if Zero-Trust is enabled) */}
+            {form.isRecipientBound && (
+              <div className="pl-10 space-y-3 animate-in fade-in slide-in-from-top-2">
+                <label className="block text-sm font-semibold text-slate-800 dark:text-slate-200">
+                  Allowed Verification Methods
+                </label>
+                <div className="flex items-center gap-4">
+                  <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+                    <input
+                      type="checkbox"
+                      className="accent-emerald-500 w-4 h-4"
+                      checked={form.allowedVerificationMethods.includes('email_otp')}
+                      onChange={(e) => {
+                        const methods = e.target.checked
+                          ? [...form.allowedVerificationMethods, 'email_otp']
+                          : form.allowedVerificationMethods.filter(m => m !== 'email_otp');
+                        setForm({ ...form, allowedVerificationMethods: methods });
+                      }}
+                    />
+                    Email OTP
+                  </label>
+
+                  <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+                    <input
+                      type="checkbox"
+                      className="accent-emerald-500 w-4 h-4"
+                      checked={form.allowedVerificationMethods.includes('password')}
+                      onChange={(e) => {
+                        const methods = e.target.checked
+                          ? [...form.allowedVerificationMethods, 'password']
+                          : form.allowedVerificationMethods.filter(m => m !== 'password');
+                        setForm({ ...form, allowedVerificationMethods: methods });
+                      }}
+                    />
+                    Link Password
+                  </label>
+                </div>
+                {form.allowedVerificationMethods.length === 0 && (
+                  <p className="text-xs text-red-500 mt-1">
+                    Please select at least one verification method.
+                  </p>
+                )}
+              </div>
+            )}
+
             <Input
               label="Password Protection"
               type="password"
@@ -712,11 +789,10 @@ export const CreateLinkForm = ({ onSuccess }) => {
               }
             >
               <div
-                className={`mt-1 w-5 h-5 rounded border flex items-center justify-center ${
-                  form.showPreview
+                className={`mt-1 w-5 h-5 rounded border flex items-center justify-center ${form.showPreview
                     ? 'bg-emerald-500 border-emerald-500'
                     : 'border-slate-600'
-                }`}
+                  }`}
               >
                 {form.showPreview && (
                   <Eye className="w-3 h-3 text-slate-950" />
@@ -753,7 +829,7 @@ export const CreateLinkForm = ({ onSuccess }) => {
               </p>
             </div>
 
-             {/* 🔥 Dynamic redirect rules */}
+            {/* 🔥 Dynamic redirect rules */}
             <section className="mt-2 border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900">
               <header className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-800">
                 <div>
@@ -1170,7 +1246,7 @@ export const CreateLinkForm = ({ onSuccess }) => {
 };
 
 
-       
+
 
 /* ===========================
    EDIT LINK FORM
@@ -1260,11 +1336,10 @@ export const EditLinkForm = ({ link, onSuccess }) => {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 text-sm font-medium capitalize transition-colors ${
-              activeTab === tab
+            className={`px-4 py-2 text-sm font-medium capitalize transition-colors ${activeTab === tab
                 ? 'text-emerald-500 border-b-2 border-emerald-500'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
+              }`}
           >
             {tab}
           </button>
@@ -1446,11 +1521,10 @@ export const EditLinkForm = ({ link, onSuccess }) => {
               }
             >
               <div
-                className={`mt-1 w-5 h-5 rounded border flex items-center justify-center ${
-                  form.showPreview
+                className={`mt-1 w-5 h-5 rounded border flex items-center justify-center ${form.showPreview
                     ? 'bg-emerald-500 border-emerald-500'
                     : 'border-slate-600'
-                }`}
+                  }`}
               >
                 {form.showPreview && (
                   <Eye className="w-3 h-3 text-slate-950" />

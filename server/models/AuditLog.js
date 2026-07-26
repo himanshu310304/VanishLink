@@ -25,6 +25,8 @@ const auditLogSchema = new mongoose.Schema({
       'APPROVE_REPORT',
       'REJECT_REPORT',
       'BULK_MODERATION',
+      'SYSTEM_EVENT',
+      'VIEW_ADMIN_OVERVIEW',
     ],
   },
   adminId: {

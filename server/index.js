@@ -7,7 +7,7 @@ const https = require('https'); // for webhook requests
 const { Server } = require('socket.io');
 require('dotenv').config();
 
-const watchRoutes = require('./routes/watchRoutes');
+
 const analyticsRoutes = require('./routes/analyticsRoutes');
 const Link = require('./models/Link');
 const AnalyticsEvent = require('./models/AnalyticsEvent');
@@ -26,6 +26,11 @@ const securityRoutes = require('./routes/securityRoutes');
 const { basicUrlSafetyCheck } = require('./scripts/urlSafety');
 const linkRoutes = require('./routes/linkRoutes');
 
+// 🔐 Trusted Recipient & Device-Bound Secure Sharing
+const invitationsRoutes = require('./routes/invitations');
+const zeroTrustRoutes = require('./routes/zeroTrustRoutes');
+const invitationRoutes = require('./routes/invitationRoutes');
+const { detectDirectAccessAttempt } = require('./middleware/leakDetector');
 
 const app = express();
 const PORT = process.env.PORT || 5050;
@@ -33,7 +38,10 @@ const PORT = process.env.PORT || 5050;
 const passport = require('passport');
 require('./config/passport');
 
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true,
+}));
 app.use(express.json({ limit: '10mb' })); // Increase limit for base64 images
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(passport.initialize());
@@ -66,8 +74,7 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-// watch party REST routes (protected)
-app.use('/api/watch', authenticate, watchRoutes);
+
 
 // analytics REST routes (REAL data) - protected
 app.use('/api/analytics', authenticate, analyticsRoutes);
@@ -103,6 +110,10 @@ app.use('/api/security', securityRoutes);
 // similarity / helper link routes
 app.use('/api/links', linkRoutes);
 
+// 🔐 Secure Sharing Routes
+app.use('/api/invitations', invitationsRoutes); // Old fallback
+app.use('/api/zero-trust', zeroTrustRoutes);
+app.use('/api/links/:linkId/invitations', invitationRoutes);
 
 // ---------------- LINK CRUD ---------------- //
 
@@ -110,9 +121,9 @@ app.use('/api/links', linkRoutes);
 app.get('/api/links/public', authenticate, async (req, res) => {
   try {
     const links = await Link.find({})
-    .sort({ createdAt: -1 })
-    .limit(500) // Limit to prevent overwhelming the client
-    .select('_id slug targetUrl title clicks createdAt ownerEmail password showPreview isOneTime maxClicks collection status');
+      .sort({ createdAt: -1 })
+      .limit(500) // Limit to prevent overwhelming the client
+      .select('_id slug targetUrl title clicks createdAt ownerEmail password showPreview isOneTime maxClicks collection status');
 
     console.log(`📊 Fetched ${links.length} public links`);
     res.json(links);
@@ -137,13 +148,20 @@ app.get('/api/links', authenticate, async (req, res) => {
 });
 
 // GET /api/links/:slug - fetch a single link with rule checks
-app.get('/api/links/:slug', async (req, res) => {
+app.get('/api/links/:slug', detectDirectAccessAttempt, async (req, res) => {
   try {
     const { slug } = req.params;
 
     const link = await Link.findOne({ slug });
     if (!link) {
       return res.status(404).json({ status: 'not_found' });
+    }
+
+    if (link.isRecipientBound) {
+      return res.status(403).json({
+        status: 'blocked',
+        reason: 'This secure link requires a valid invitation token.',
+      });
     }
 
     const now = new Date();
@@ -204,6 +222,8 @@ app.get('/api/links/:slug', async (req, res) => {
   }
 });
 
+const { requireZeroTrust } = require('./middleware/zeroTrustAuth');
+
 // POST /api/links - create a new short link (protected + rate limited)
 app.post('/api/links', authenticate, linkCreationLimiter, async (req, res) => {
   try {
@@ -226,6 +246,8 @@ app.post('/api/links', authenticate, linkCreationLimiter, async (req, res) => {
       conditionalRedirect,
       webhookConfig,
       visibility,
+      isRecipientBound,
+      allowedVerificationMethods,
     } = req.body || {};
 
     // accept either `url` or `targetUrl`
@@ -237,7 +259,7 @@ app.post('/api/links', authenticate, linkCreationLimiter, async (req, res) => {
         .json({ message: 'destination url is required' }); // 🔴 new text
     }
     const finalVisibility =
-  visibility === 'private' ? 'private' : 'public';
+      visibility === 'private' ? 'private' : 'public';
 
 
     // 🧠 run heuristic safety scan for this URL
@@ -282,7 +304,13 @@ app.post('/api/links', authenticate, linkCreationLimiter, async (req, res) => {
       ownerEmail: ownerEmail || null,
       isFavorite: false,
 
-       visibility: finalVisibility,
+      visibility: finalVisibility,
+      
+      // Zero-Trust configs
+      isRecipientBound: !!isRecipientBound,
+      allowedVerificationMethods: Array.isArray(allowedVerificationMethods) 
+        ? allowedVerificationMethods 
+        : (isRecipientBound ? ['email_otp'] : []),
 
       conditionalRedirect: conditionalRedirect || undefined,
       webhookConfig: webhookConfig || undefined,
@@ -319,8 +347,12 @@ app.put('/api/links/:id', authenticate, async (req, res) => {
       showPreview,
       collection,
       creatorName,
+      scheduleStart,
       conditionalRedirect,
       webhookConfig,
+      visibility,
+      isRecipientBound,
+      allowedVerificationMethods,
     } = req.body || {};
 
     const link = await Link.findById(id);
@@ -344,6 +376,9 @@ app.put('/api/links/:id', authenticate, async (req, res) => {
     if (showPreview !== undefined) link.showPreview = !!showPreview;
     if (collection !== undefined) link.collection = collection;
     if (creatorName !== undefined) link.creatorName = creatorName;
+    if (scheduleStart !== undefined)
+      link.scheduleStart = scheduleStart ? new Date(scheduleStart) : null;
+
     if (conditionalRedirect !== undefined) {
       link.conditionalRedirect = conditionalRedirect;
     }
@@ -351,9 +386,15 @@ app.put('/api/links/:id', authenticate, async (req, res) => {
       link.webhookConfig = webhookConfig;
     }
     if (visibility !== undefined) {
-  link.visibility =
-    visibility === 'private' ? 'private' : 'public';
-}
+      link.visibility =
+        visibility === 'private' ? 'private' : 'public';
+    }
+    if (isRecipientBound !== undefined) {
+      link.isRecipientBound = !!isRecipientBound;
+    }
+    if (allowedVerificationMethods !== undefined) {
+      link.allowedVerificationMethods = allowedVerificationMethods;
+    }
 
 
     const updated = await link.save();
@@ -500,7 +541,7 @@ function sendWebhook(link, eventType, extra = {}) {
         'Content-Length': Buffer.byteLength(payload),
       },
     },
-    () => {}
+    () => { }
   );
 
   req.write(payload);
@@ -508,10 +549,14 @@ function sendWebhook(link, eventType, extra = {}) {
 }
 
 // ✅ REAL REDIRECT ENDPOINT (SAME LOGIC, CONFLICT-FREE)
-app.get('/r/:slug', redirectLimiter, async (req, res) => {
+app.get('/r/:slug', redirectLimiter, detectDirectAccessAttempt, async (req, res) => {
   try {
     const link = await Link.findOne({ slug: req.params.slug });
     if (!link) return res.status(404).send('VanishLink: Not found');
+
+    if (link.isRecipientBound) {
+      return res.status(403).send('VanishLink: This secure link requires a valid invitation token.');
+    }
 
     const now = new Date();
 
@@ -622,6 +667,11 @@ app.get('/r/:slug', redirectLimiter, async (req, res) => {
       } else if (urlObj.hostname === 'youtu.be') {
         const v = urlObj.pathname.slice(1);
         if (v) cloakUrl = `https://www.youtube.com/embed/${v}?autoplay=1`;
+      } else if (urlObj.hostname === 'drive.google.com') {
+        if (urlObj.pathname.endsWith('/view')) {
+          urlObj.pathname = urlObj.pathname.replace(/\/view$/, '/preview');
+          cloakUrl = urlObj.toString();
+        }
       }
     } catch (e) {
       // Ignore URL parsing errors and fallback to original
@@ -635,6 +685,51 @@ app.get('/r/:slug', redirectLimiter, async (req, res) => {
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>${link.title || 'VanishLink'}</title>
+        <style>
+          body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background-color: #0f172a; font-family: system-ui, -apple-system, sans-serif; }
+          iframe { border: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; }
+        </style>
+      </head>
+      <body>
+        <iframe src="${cloakUrl}" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+      </body>
+      </html>
+    `;
+    return res.send(html);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('VanishLink: Internal server error');
+  }
+});
+
+
+// ---------------- SECURE VIEWER ROUTE ---------------- //
+app.get('/secure-view/:token', requireZeroTrust, async (req, res) => {
+  try {
+    const { link, invitation } = req.zeroTrust;
+    const finalTarget = link.targetUrl;
+
+    let cloakUrl = finalTarget;
+    try {
+      const urlObj = new URL(finalTarget);
+      if (urlObj.hostname.includes('youtube.com') && urlObj.pathname === '/watch') {
+        const v = urlObj.searchParams.get('v');
+        if (v) cloakUrl = `https://www.youtube.com/embed/${v}?autoplay=1`;
+      } else if (urlObj.hostname === 'youtu.be') {
+        const v = urlObj.pathname.slice(1);
+        if (v) cloakUrl = `https://www.youtube.com/embed/${v}?autoplay=1`;
+      }
+    } catch (e) {
+      // Ignore
+    }
+
+    const html = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${link.title || 'VanishLink Secure View'}</title>
         <style>
           body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background-color: #0f172a; font-family: system-ui, -apple-system, sans-serif; }
           iframe { border: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; }
@@ -663,8 +758,6 @@ app.get('/r/:slug', redirectLimiter, async (req, res) => {
         </div>
 
         <script>
-          // Automatically show the fallback bar after 2 seconds
-          // This ensures that if the iframe is blocked by X-Frame-Options, the user can still proceed.
           setTimeout(() => {
             document.getElementById('fallback').classList.add('show');
           }, 2000);
@@ -694,33 +787,18 @@ const io = new Server(server, {
 // expose io to all routes via req.app.get('io')
 app.set('io', io);
 
+// Expose globally for notificationService real-time alerts
+global._io = io;
+
 io.on('connection', (socket) => {
   console.log('🔌 Client connected:', socket.id);
 
-  socket.on('join-room', ({ roomCode, userName }) => {
-    socket.join(roomCode);
-    socket.data.roomCode = roomCode;
-    socket.data.userName = userName || 'Guest';
-
-    socket.to(roomCode).emit('user-joined', {
-      userName: socket.data.userName,
-    });
-  });
-
-  socket.on('player-action', (payload) => {
-    const { roomCode } = payload;
-    if (!roomCode) return;
-    socket.to(roomCode).emit('player-action', payload);
-  });
-
-  socket.on('chat-message', ({ roomCode, userName, message }) => {
-    if (!roomCode || !message?.trim()) return;
-
-    io.to(roomCode).emit('chat-message', {
-      userName: userName || socket.data.userName || 'Guest',
-      message,
-      ts: Date.now(),
-    });
+  // Allow authenticated users to join their personal notification room
+  socket.on('join-user-room', (userId) => {
+    if (userId) {
+      socket.join(`user:${userId}`);
+      console.log(`📡 User ${userId} joined notification room`);
+    }
   });
 
   socket.on('disconnect', () => {

@@ -86,6 +86,24 @@ const linkSchema = new mongoose.Schema(
       enum: ['public', 'private'],
       default: 'public',
     },
+    
+    // NEW: Zero-Trust Recipient-Bound sharing
+    isRecipientBound: { type: Boolean, default: false },
+    allowedVerificationMethods: {
+      type: [String],
+      enum: ['email_otp', 'password', 'magic_link'],
+      default: ['email_otp'],
+    },
+    deviceBindingMode: {
+      type: String,
+      enum: ['strict', 'approval', 'flexible'],
+      default: 'strict',
+    },
+    leakAction: {
+      type: String,
+      enum: ['notify', 'freeze', 'destroy'],
+      default: 'notify',
+    },
 
     password: { type: String, default: null },
     isOneTime: { type: Boolean, default: false },
@@ -94,7 +112,7 @@ const linkSchema = new mongoose.Schema(
     showPreview: { type: Boolean, default: false },
     collection: { type: String, default: 'General' },
     scheduleStart: { type: Date, default: null },
-     visibility: {
+    visibility: {
       type: String,
       enum: ['public', 'private'],
       default: 'public',

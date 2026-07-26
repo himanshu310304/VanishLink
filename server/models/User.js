@@ -20,6 +20,9 @@ userSchema.pre('save', async function () {
   if (!this.isModified('password')) return;
   // Skip hashing if password is null (OAuth users)
   if (!this.password) return;
+  // Prevent double-hashing if password is already a bcrypt hash
+  if (this.password.startsWith('$2a$') || this.password.startsWith('$2b$')) return;
+  
   this.password = await bcrypt.hash(this.password, 10);
 });
 
