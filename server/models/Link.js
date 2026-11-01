@@ -168,4 +168,7 @@ const linkSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+linkSchema.index({ ownerEmail: 1, createdAt: -1 });
+linkSchema.index({ visibility: 1, createdAt: -1 });
+
 module.exports = mongoose.model('Link', linkSchema);

@@ -6,6 +6,7 @@ const OTPSchema = new mongoose.Schema(
     code: { type: String, required: true },
     purpose: { type: String, enum: ['register', 'reset'], required: true },
     expiresAt: { type: Date, required: true },
+    attempts: { type: Number, default: 0 },
     meta: { type: mongoose.Schema.Types.Mixed, default: {} },
   },
   { timestamps: true }

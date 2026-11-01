@@ -4,7 +4,7 @@ function buildTransport() {
   const user = process.env.EMAIL_USER;
   const pass = process.env.EMAIL_PASS;
 
-  if (!user || !pass) {
+  if (!user || !pass || process.env.NODE_ENV === 'test') {
     return null;
   }
 

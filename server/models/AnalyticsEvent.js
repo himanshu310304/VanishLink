@@ -18,4 +18,7 @@ const analyticsEventSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+analyticsEventSchema.index({ link: 1, createdAt: -1 });
+analyticsEventSchema.index({ slug: 1, createdAt: -1 });
+
 module.exports = mongoose.model('AnalyticsEvent', analyticsEventSchema);

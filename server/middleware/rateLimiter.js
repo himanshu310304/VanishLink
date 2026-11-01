@@ -37,11 +37,19 @@ global.reloadSettings = async () => {
   }
 };
 
-// Reload settings every 5 minutes (backup)
-setInterval(loadSettings, 5 * 60 * 1000);
+if (process.env.NODE_ENV !== 'test') {
+  // Reload settings every 5 minutes (backup)
+  setInterval(loadSettings, 5 * 60 * 1000);
 
-// Load settings on startup (after MongoDB connects)
-setTimeout(loadSettings, 2000);
+  // Load settings on startup (after MongoDB connects)
+  setTimeout(loadSettings, 2000);
+}
+
+// Helper to check localhost
+const isLocalhost = (req) => {
+  const ip = req.ip || req.connection?.remoteAddress || '';
+  return ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1';
+};
 
 // General API rate limiter - uses dynamic max from settings
 const generalLimiter = rateLimit({
@@ -50,6 +58,7 @@ const generalLimiter = rateLimit({
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
+  skip: isLocalhost,
 });
 
 // Strict limiter for authentication routes - uses dynamic max from settings
@@ -78,6 +87,7 @@ const redirectLimiter = rateLimit({
   message: 'Too many redirect attempts detected.',
   standardHeaders: true,
   legacyHeaders: false,
+  skip: isLocalhost,
 });
 
 module.exports = {

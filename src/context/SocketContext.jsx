@@ -20,8 +20,9 @@ export const SocketProvider = ({ children }) => {
   useEffect(() => {
     if (socket && user) {
       const userId = user._id || user.id || user.sub;
+      const token = localStorage.getItem('vanishlink_token');
       if (userId) {
-        socket.emit('join-user-room', userId);
+        socket.emit('join-user-room', { userId, token });
       }
     }
   }, [socket, user]);

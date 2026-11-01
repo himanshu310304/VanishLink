@@ -1,0 +1,42 @@
+{
+  "dataset": {
+    "totalLinks": 10099,
+    "totalAnalyticsEvents": 132823
+  },
+  "query1_links_by_owner": {
+    "query": "{ ownerEmail: targetEmail }, sort: { createdAt: -1 }",
+    "baseline": {
+      "stage": "SORT",
+      "totalDocsExamined": 10099,
+      "totalKeysExamined": 0,
+      "executionTimeMillis": 4,
+      "nReturned": 100
+    },
+    "optimized": {
+      "indexAdded": "{ ownerEmail: 1, createdAt: -1 }",
+      "stage": "FETCH",
+      "totalDocsExamined": 100,
+      "totalKeysExamined": 100,
+      "executionTimeMillis": 1,
+      "nReturned": 100
+    }
+  },
+  "query2_analytics_events": {
+    "query": "{ link: { $in: [ids] }, createdAt: { $gte: 7days } }",
+    "baseline": {
+      "stage": "COLLSCAN",
+      "totalDocsExamined": 132823,
+      "totalKeysExamined": 0,
+      "executionTimeMillis": 25,
+      "nReturned": 400
+    },
+    "optimized": {
+      "indexAdded": "{ link: 1, createdAt: -1 }",
+      "stage": "FETCH",
+      "totalDocsExamined": 400,
+      "totalKeysExamined": 401,
+      "executionTimeMillis": 1,
+      "nReturned": 400
+    }
+  }
+}

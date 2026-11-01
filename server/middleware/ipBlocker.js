@@ -29,21 +29,23 @@ if (!global.reloadSettingsFunctions) {
 }
 global.reloadSettingsFunctions.push(loadSettings);
 
-// Reload settings every 5 minutes (backup)
-setInterval(loadSettings, 5 * 60 * 1000);
+if (process.env.NODE_ENV !== 'test') {
+  // Reload settings every 5 minutes (backup)
+  setInterval(loadSettings, 5 * 60 * 1000);
 
-// Load settings on startup (after MongoDB connects)
-setTimeout(loadSettings, 2000);
+  // Load settings on startup (after MongoDB connects)
+  setTimeout(loadSettings, 2000);
 
-// Clean up old entries periodically
-setInterval(() => {
-  const now = Date.now();
-  for (const [ip, data] of suspiciousIPs.entries()) {
-    if (now - data.lastSeen > TRACKING_WINDOW) {
-      suspiciousIPs.delete(ip);
+  // Clean up old entries periodically
+  setInterval(() => {
+    const now = Date.now();
+    for (const [ip, data] of suspiciousIPs.entries()) {
+      if (now - data.lastSeen > TRACKING_WINDOW) {
+        suspiciousIPs.delete(ip);
+      }
     }
-  }
-}, TRACKING_WINDOW);
+  }, TRACKING_WINDOW);
+}
 
 /**
  * Middleware to block known malicious IPs

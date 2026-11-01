@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const http = require('http');
 const https = require('https'); // for webhook requests
 const { Server } = require('socket.io');
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 
@@ -120,10 +121,10 @@ app.use('/api/links/:linkId/invitations', invitationRoutes);
 // GET /api/links/public - fetch all public/active links (for community browsing)
 app.get('/api/links/public', authenticate, async (req, res) => {
   try {
-    const links = await Link.find({})
+    const links = await Link.find({ visibility: 'public', status: { $ne: 'blocked' } })
       .sort({ createdAt: -1 })
       .limit(500) // Limit to prevent overwhelming the client
-      .select('_id slug targetUrl title clicks createdAt ownerEmail password showPreview isOneTime maxClicks collection status');
+      .select('_id slug targetUrl title clicks createdAt ownerEmail showPreview isOneTime maxClicks collection status');
 
     console.log(`📊 Fetched ${links.length} public links`);
     res.json(links);
@@ -257,6 +258,20 @@ app.post('/api/links', authenticate, linkCreationLimiter, async (req, res) => {
       return res
         .status(400)
         .json({ message: 'destination url is required' }); // 🔴 new text
+    }
+
+    // Protocol validation: strictly allow only http: and https:
+    try {
+      const parsedUrl = new URL(finalUrl);
+      if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+        return res
+          .status(400)
+          .json({ message: 'Invalid URL protocol. Only http: and https: are allowed.' });
+      }
+    } catch (urlErr) {
+      return res
+        .status(400)
+        .json({ message: 'Invalid URL format.' });
     }
     const finalVisibility =
       visibility === 'private' ? 'private' : 'public';
@@ -548,7 +563,7 @@ function sendWebhook(link, eventType, extra = {}) {
   req.end();
 }
 
-// ✅ REAL REDIRECT ENDPOINT (SAME LOGIC, CONFLICT-FREE)
+// ✅ REAL REDIRECT ENDPOINT (ATOMIC CONCURRENCY-SAFE)
 app.get('/r/:slug', redirectLimiter, detectDirectAccessAttempt, async (req, res) => {
   try {
     const link = await Link.findOne({ slug: req.params.slug });
@@ -562,8 +577,10 @@ app.get('/r/:slug', redirectLimiter, detectDirectAccessAttempt, async (req, res)
 
     if (link.expiresAt && now > link.expiresAt) {
       if (link.status !== 'expired') {
-        link.status = 'expired';
-        await link.save();
+        await Link.updateOne(
+          { _id: link._id, status: { $ne: 'expired' } },
+          { $set: { status: 'expired' } }
+        );
         sendWebhook(link, 'expired', { reason: 'time_expired' });
       }
       return res.status(410).send('VanishLink: Expired');
@@ -573,21 +590,56 @@ app.get('/r/:slug', redirectLimiter, detectDirectAccessAttempt, async (req, res)
       return res.status(403).send('VanishLink: Not active yet');
     }
 
-    const limit = link.isOneTime ? 1 : link.maxClicks || 0;
+    const limit = link.isOneTime ? 1 : (link.maxClicks || 0);
     if (limit > 0 && link.clicks >= limit) {
       return res.status(410).send('VanishLink: Click limit reached');
     }
 
+    // 🔒 ATOMIC CONDITIONAL INCREMENT (Prevents Read-Modify-Write Race Conditions)
+    let updatedLink;
+    if (limit > 0) {
+      updatedLink = await Link.findOneAndUpdate(
+        {
+          _id: link._id,
+          clicks: { $lt: limit }
+        },
+        {
+          $inc: { clicks: 1 }
+        },
+        { new: true }
+      );
+
+      if (!updatedLink) {
+        // Another concurrent request exhausted the allowed clicks
+        await Link.updateOne(
+          { _id: link._id, status: { $ne: 'expired' } },
+          { $set: { status: 'expired' } }
+        );
+        return res.status(410).send('VanishLink: Click limit reached');
+      }
+    } else {
+      updatedLink = await Link.findOneAndUpdate(
+        { _id: link._id },
+        { $inc: { clicks: 1 } },
+        { new: true }
+      );
+    }
+
+    const nextClicks = updatedLink.clicks;
+    if (limit > 0 && nextClicks >= limit) {
+      await Link.updateOne(
+        { _id: link._id, status: { $ne: 'expired' } },
+        { $set: { status: 'expired' } }
+      );
+      sendWebhook(updatedLink, 'expired', { reason: 'max_clicks_reached' });
+    }
+
     const userAgent = req.headers['user-agent'] || '';
     const deviceType = getDeviceType(userAgent);
-    const nextClicks = link.clicks + 1;
 
-    let finalTarget = link.targetUrl;
-    const conditional = chooseConditionalTarget(link, deviceType, now, nextClicks);
+    let finalTarget = updatedLink.targetUrl;
+    const conditional = chooseConditionalTarget(updatedLink, deviceType, now, nextClicks);
     if (conditional) finalTarget = conditional;
-
-    link.clicks = nextClicks;
-    await link.save();
 
     // Record Analytics Event
     try {
@@ -801,12 +853,28 @@ global._io = io;
 io.on('connection', (socket) => {
   console.log('🔌 Client connected:', socket.id);
 
-  // Allow authenticated users to join their personal notification room
-  socket.on('join-user-room', (userId) => {
-    if (userId) {
-      socket.join(`user:${userId}`);
-      console.log(`📡 User ${userId} joined notification room`);
+  // Allow authenticated users to join their personal notification room securely
+  socket.on('join-user-room', (data) => {
+    let targetUserId = typeof data === 'object' ? data.userId : data;
+    const token = typeof data === 'object' ? data.token : socket.handshake.auth?.token;
+
+    if (!targetUserId) return;
+
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'VanishLink2025SecureKey!@$%^&*()_.+');
+        if (decoded.sub === targetUserId || decoded.role === 'admin') {
+          socket.join(`user:${targetUserId}`);
+          console.log(`📡 Authorized user ${targetUserId} joined notification room`);
+          return;
+        }
+      } catch (err) {
+        socket.emit('auth_error', { message: 'Invalid or expired token for room subscription' });
+        return;
+      }
     }
+
+    socket.emit('auth_error', { message: 'Authentication required to subscribe to private events' });
   });
 
   socket.on('disconnect', () => {
@@ -814,6 +882,10 @@ io.on('connection', (socket) => {
   });
 });
 
-server.listen(PORT, () => {
-  console.log(`API + Socket server running on http://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV !== 'test' && require.main === module) {
+  server.listen(PORT, () => {
+    console.log(`API + Socket server running on http://localhost:${PORT}`);
+  });
+}
+
+module.exports = { app, server, io };

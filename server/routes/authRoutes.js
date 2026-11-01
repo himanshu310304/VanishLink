@@ -99,7 +99,7 @@ router.post('/register/initiate', async (req, res) => {
 			message: 'Registration code sent',
 			mode: result.mode,
 		};
-		if (result.mode === 'console') {
+		if (result.mode === 'console' && process.env.NODE_ENV !== 'production') {
 			responsePayload.devCode = code;
 		}
 		return res.json(responsePayload);
@@ -118,7 +118,7 @@ router.post('/register/verify', async (req, res) => {
 			return res.status(400).json({ message: 'Email and code required' });
 		}
 
-		const otpRecord = await OTP.findOne({ email, code, purpose: 'register' });
+		const otpRecord = await OTP.findOne({ email, purpose: 'register' });
 		if (!otpRecord) {
 			return res.status(401).json({ message: 'Invalid or expired code' });
 		}
@@ -126,6 +126,21 @@ router.post('/register/verify', async (req, res) => {
 		if (new Date() > otpRecord.expiresAt) {
 			await OTP.deleteOne({ _id: otpRecord._id });
 			return res.status(401).json({ message: 'Code expired' });
+		}
+
+		if (otpRecord.attempts >= 5) {
+			await OTP.deleteOne({ _id: otpRecord._id });
+			return res.status(429).json({ message: 'Too many failed verification attempts. Code has been invalidated.' });
+		}
+
+		if (otpRecord.code !== code) {
+			otpRecord.attempts = (otpRecord.attempts || 0) + 1;
+			if (otpRecord.attempts >= 5) {
+				await OTP.deleteOne({ _id: otpRecord._id });
+				return res.status(429).json({ message: 'Too many failed verification attempts. Code has been invalidated.' });
+			}
+			await otpRecord.save();
+			return res.status(401).json({ message: 'Invalid or expired code' });
 		}
 
 		const { name, passwordHash, role } = otpRecord.meta || {};
@@ -286,7 +301,7 @@ router.post('/forgot-password', async (req, res) => {
 			message: 'Reset code sent',
 			mode: result.mode,
 		};
-		if (result.mode === 'console') {
+		if (result.mode === 'console' && process.env.NODE_ENV !== 'production') {
 			responsePayload.devCode = code;
 		}
 		return res.json(responsePayload);
@@ -321,9 +336,7 @@ router.post('/reset-password', async (req, res) => {
 		const allOtps = await OTP.find({ email, purpose: 'reset' });
 		console.log('📧 All OTPs for this email:', allOtps.map(o => ({ code: o.code, expiresAt: o.expiresAt, created: o.createdAt })));
 
-		const otpRecord = await OTP.findOne({ email, code, purpose: 'reset' });
-		console.log('✅ Matching OTP found:', otpRecord ? 'YES' : 'NO');
-		
+		const otpRecord = await OTP.findOne({ email, purpose: 'reset' });
 		if (!otpRecord) {
 			return res.status(401).json({ message: 'Invalid or expired code' });
 		}
@@ -331,6 +344,21 @@ router.post('/reset-password', async (req, res) => {
 		if (new Date() > otpRecord.expiresAt) {
 			await OTP.deleteOne({ _id: otpRecord._id });
 			return res.status(401).json({ message: 'Code expired' });
+		}
+
+		if (otpRecord.attempts >= 5) {
+			await OTP.deleteOne({ _id: otpRecord._id });
+			return res.status(429).json({ message: 'Too many failed verification attempts. Code has been invalidated.' });
+		}
+
+		if (otpRecord.code !== code) {
+			otpRecord.attempts = (otpRecord.attempts || 0) + 1;
+			if (otpRecord.attempts >= 5) {
+				await OTP.deleteOne({ _id: otpRecord._id });
+				return res.status(429).json({ message: 'Too many failed verification attempts. Code has been invalidated.' });
+			}
+			await otpRecord.save();
+			return res.status(401).json({ message: 'Invalid or expired code' });
 		}
 
 		const user = await User.findOne({ email });

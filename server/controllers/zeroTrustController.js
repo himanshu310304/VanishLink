@@ -1,4 +1,5 @@
 const Invitation = require('../models/Invitation');
+const Link = require('../models/Link');
 const fingerprintService = require('../services/fingerprintService');
 const { sendOTP } = require('../utils/emailService');
 
@@ -114,14 +115,24 @@ exports.accessLink = async (req, res) => {
   try {
     const { link, invitation } = req.zeroTrust;
 
-    // Enforce max access count
-    if (link.maxClicks > 0 && link.clicks >= link.maxClicks) {
-      return res.status(403).json({ message: 'Access Denied. This link has reached its maximum access limit.' });
+    // Enforce max access count atomically
+    const limit = link.isOneTime ? 1 : (link.maxClicks || 0);
+    let updatedLink;
+    if (limit > 0) {
+      updatedLink = await Link.findOneAndUpdate(
+        {
+          _id: link._id,
+          clicks: { $lt: limit }
+        },
+        { $inc: { clicks: 1 } },
+        { new: true }
+      );
+      if (!updatedLink) {
+        return res.status(403).json({ message: 'Access Denied. This link has reached its maximum access limit.' });
+      }
+    } else {
+      updatedLink = await Link.findByIdAndUpdate(link._id, { $inc: { clicks: 1 } }, { new: true });
     }
-
-    // Increment clicks and save
-    link.clicks += 1;
-    await link.save();
 
     const host = req.get('host');
     const protocol = req.protocol;
